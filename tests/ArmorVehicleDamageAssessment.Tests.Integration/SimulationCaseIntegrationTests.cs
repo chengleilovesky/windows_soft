@@ -1,6 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using ArmorVehicleDamageAssessment.Common.Interfaces;
+using ArmorVehicleDamageAssessment.Common.Models;
 using ArmorVehicleDamageAssessment.Core.Interfaces;
 using ArmorVehicleDamageAssessment.Core.Models;
 using ArmorVehicleDamageAssessment.Core.Services;
@@ -9,6 +13,7 @@ using ArmorVehicleDamageAssessment.Data.Repositories;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Xunit;
 using Xunit.Abstractions;
 
