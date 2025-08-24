@@ -278,7 +278,7 @@
                                TextAlignment="Center"
                                Margin="0,16,0,8"
                                Foreground="{DynamicResource MaterialDesignBodyLight}"/>
-                    <TextBlock Text="点击"新增算例"按钮创建您的第一个仿真算例"
+                    <TextBlock Text="点击&quot;新增算例&quot;按钮创建您的第一个仿真算例"
                                Style="{StaticResource BodyTextBlock}"
                                TextAlignment="Center"
                                Foreground="{DynamicResource MaterialDesignBodyLight}"/>
