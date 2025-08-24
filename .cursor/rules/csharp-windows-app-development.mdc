@@ -1,0 +1,296 @@
+---
+alwaysApply: true
+description: C#.NET Windows桌面应用开发规范和最佳实践
+---
+
+# C#.NET Windows桌面应用开发规范
+
+## 项目角色定义
+
+### 开发团队角色
+- **架构师**: 负责系统架构设计、技术选型和核心模块设计
+- **高级开发工程师**: 负责核心功能模块开发、代码审查和技术难点攻克
+- **前端UI工程师**: 负责WinForms界面设计和用户体验优化
+- **数据库工程师**: 负责SQLite数据库设计、优化和数据迁移
+- **测试工程师**: 负责单元测试、集成测试和UI自动化测试
+
+## 项目目录结构
+
+```
+ProjectName/
+├── src/                          # 源代码目录
+│   ├── ProjectName.Core/          # 核心业务逻辑层
+│   │   ├── Models/               # 数据模型
+│   │   ├── Services/             # 业务服务
+│   │   ├── Interfaces/           # 接口定义
+│   │   └── Extensions/           # 扩展方法
+│   ├── ProjectName.Data/          # 数据访问层
+│   │   ├── Context/              # 数据库上下文
+│   │   ├── Entities/             # 数据实体
+│   │   ├── Repositories/         # 仓储模式
+│   │   └── Migrations/           # 数据库迁移
+│   ├── ProjectName.UI/            # 用户界面层
+│   │   ├── Views/                # 视图文件
+│   │   ├── ViewModels/           # 视图模型
+│   │   ├── Controls/             # 自定义控件
+│   │   ├── Converters/           # 值转换器
+│   │   ├── Resources/            # 资源文件
+│   │   └── Styles/               # 样式文件
+│   └── ProjectName.Common/        # 公共工具类
+│       ├── Helpers/              # 辅助类
+│       ├── Constants/            # 常量定义
+│       └── Utilities/            # 工具类
+├── tests/                        # 测试目录
+│   ├── ProjectName.Tests.Unit/    # 单元测试
+│   ├── ProjectName.Tests.Integration/ # 集成测试
+│   └── ProjectName.Tests.UI/      # UI测试
+├── docs/                         # 文档目录
+├── scripts/                      # 脚本目录
+├── database/                     # 数据库相关文件
+│   ├── init.sql                  # 初始化脚本
+│   └── migrations/               # 迁移脚本
+└── assets/                       # 资源文件
+    ├── images/
+    ├── icons/
+    └── fonts/
+```
+
+## 技术栈和框架选择
+
+### 核心技术
+- **.NET Framework/Core**: 根据部署环境选择 .NET Framework 4.8+ 或 .NET 6/7/8
+- **UI框架**: WinForms
+- **架构模式**: VP（WinForms）
+- **依赖注入**: Microsoft.Extensions.DependencyInjection
+- **日志框架**: NLog 或 Serilog
+- **配置管理**: Microsoft.Extensions.Configuration
+
+### 数据库相关
+- **数据库**: SQLite 3.x
+- **ORM框架**: Entity Framework Core
+- **数据库迁移**: EF Core Migrations
+- **连接池**: Microsoft.Data.Sqlite
+
+## 开发规范
+
+### 命名规范
+- **类名**: PascalCase (UserService, DataRepository)
+- **方法名**: PascalCase (GetUserById, SaveData)
+- **属性名**: PascalCase (UserName, CreatedDate)
+- **字段名**: camelCase，私有字段以下划线开头 (_userName, _isInitialized)
+- **常量**: UPPER_SNAKE_CASE (MAX_RETRY_COUNT, DEFAULT_TIMEOUT)
+- **接口**: 以I开头的PascalCase (IUserService, IDataRepository)
+
+### 代码组织规范
+- **单一职责**: 每个类只负责一个功能领域
+- **依赖倒置**: 依赖于抽象而非具体实现
+- **代码复用**: 公共功能抽象为独立的服务或工具类
+- **异常处理**: 统一的异常处理机制，记录详细日志
+- **异步编程**: 对于I/O密集型操作使用async/await
+
+### SQLite数据库规范
+- **连接字符串**: 统一配置在appsettings.json中
+- **实体映射**: 使用Code First方式，通过Fluent API配置
+- **事务处理**: 对于多表操作使用数据库事务
+- **性能优化**: 合理使用索引，避免N+1查询问题
+- **数据迁移**: 使用EF Core Migrations管理数据库架构变更
+
+## 项目配置模板
+
+### 项目文件(.csproj)示例
+```xml
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+    <WarningsNotAsErrors>CS8618</WarningsNotAsErrors>
+  </PropertyGroup>
+</Project>
+```
+
+### 必需NuGet包
+```xml
+<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+<PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+<PackageReference Include="NLog" Version="5.2.5" />
+<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+```
+
+## MVVM架构实现规范
+
+### ViewModel基类
+```csharp
+public abstract class ViewModelBase : ObservableObject, INotifyPropertyChanged
+{
+    protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+    
+    protected bool SetProperty<T>(ref T field, T value, [CallerMemberName] string propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+}
+```
+
+### 命令实现
+```csharp
+public class RelayCommand : ICommand
+{
+    private readonly Action<object> _execute;
+    private readonly Func<object, bool> _canExecute;
+    
+    public RelayCommand(Action<object> execute, Func<object, bool> canExecute = null)
+    {
+        _execute = execute ?? throw new ArgumentNullException(nameof(execute));
+        _canExecute = canExecute;
+    }
+    
+    public event EventHandler CanExecuteChanged
+    {
+        add { CommandManager.RequerySuggested += value; }
+        remove { CommandManager.RequerySuggested -= value; }
+    }
+    
+    public bool CanExecute(object parameter) => _canExecute?.Invoke(parameter) ?? true;
+    public void Execute(object parameter) => _execute(parameter);
+}
+```
+
+## 数据访问层规范
+
+### DbContext配置
+```csharp
+public class ApplicationDbContext : DbContext
+{
+    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+    
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+    }
+}
+```
+
+### 仓储模式接口
+```csharp
+public interface IRepository<T> where T : class
+{
+    Task<T> GetByIdAsync(int id);
+    Task<IEnumerable<T>> GetAllAsync();
+    Task<T> AddAsync(T entity);
+    Task UpdateAsync(T entity);
+    Task DeleteAsync(int id);
+}
+```
+
+## 日志配置规范
+
+### NLog配置(NLog.config)
+```xml
+<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <targets>
+    <target xsi:type="File" name="logfile" 
+            fileName="logs/${shortdate}.log"
+            layout="${longdate} ${level:uppercase=true} ${logger} ${message} ${exception:format=tostring}" />
+  </targets>
+  <rules>
+    <logger name="*" minlevel="Info" writeTo="logfile" />
+  </rules>
+</nlog>
+```
+
+## 测试规范
+
+### 单元测试命名
+- 测试类命名: `{被测试类名}Tests`
+- 测试方法命名: `{方法名}_{场景}_{期望结果}`
+
+### 测试覆盖率要求
+- 核心业务逻辑: 90%+
+- 数据访问层: 80%+
+- UI层: 50%+
+
+## 性能优化指南
+
+### 内存管理
+- 及时释放非托管资源，实现IDisposable接口
+- 避免内存泄漏，注意事件订阅和取消订阅
+- 使用对象池减少GC压力
+
+### 数据库优化
+- 使用适当的索引提高查询性能
+- 批量操作使用事务处理
+- 避免在循环中执行数据库查询
+
+### UI响应性
+- 长时间操作使用后台线程
+- UI更新必须在主线程执行
+- 合理使用数据虚拟化和UI虚拟化
+
+## 部署和发布规范
+
+### 发布配置
+- Release模式编译
+- 启用代码优化
+- 包含必要的运行时库
+- 数字签名可执行文件
+
+### 安装包制作
+- 使用WiX Toolset或Inno Setup
+- 包含.NET运行时检测和自动安装
+- 提供卸载程序
+- 支持静默安装参数
+
+## 版本控制规范
+
+### Git工作流
+- 使用Git Flow分支模型
+- main分支保持稳定
+- develop分支用于集成开发
+- feature分支用于功能开发
+- release分支用于发布准备
+
+### 提交信息格式
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+类型: feat, fix, docs, style, refactor, test, chore
+
+## 代码质量保证
+
+### 静态代码分析
+- 启用所有编译器警告
+- 使用SonarQube或类似工具进行代码质量检查
+- 定期进行代码审查
+
+### 安全规范
+- 输入验证和参数检查
+- SQL注入防护
+- 敏感信息加密存储
+- 审计日志记录
+
+---
+
+**重要提示**: 
+- 所有代码必须遵循以上规范
+- 定期更新技术栈和依赖包版本
+- 持续改进开发流程和代码质量
+- 保持团队编码规范的一致性

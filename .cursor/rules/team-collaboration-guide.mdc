@@ -1,0 +1,617 @@
+---
+alwaysApply: true
+description: C#.NET Windows桌面应用团队协作开发指南
+---
+
+# C#.NET Windows桌面应用团队协作开发指南
+
+## 团队协作概述
+
+本指南整合了[开发规范](mdc:csharp-windows-app-development.mdc)、[测试工程师指南](mdc:testing-engineer-guide.mdc)和[UI设计规范](mdc:ui-design-guidelines.mdc)，为多角色协作提供统一的工作流程和标准。
+
+### 核心团队角色
+
+```mermaid
+graph TB
+    A[产品经理] --> B[架构师]
+    B --> C[开发工程师]
+    B --> D[UI工程师]
+    B --> E[测试工程师]
+    C --> F[DevOps工程师]
+    D --> C
+    E --> C
+    C --> G[数据库工程师]
+```
+
+## 开发生命周期协作模式
+
+### Phase 1: 需求分析与设计阶段 (1-2周)
+
+#### 角色分工
+- **产品经理**: 需求收集、用户故事编写
+- **架构师**: 技术方案设计、架构评审
+- **UI工程师**: 原型设计、交互设计
+- **测试工程师**: 测试策略制定、验收标准定义
+
+#### 输出物
+```
+需求分析阶段/
+├── 产品需求文档(PRD)
+├── 技术架构设计文档
+├── UI原型和设计稿
+├── 测试策略文档
+└── 验收标准定义
+```
+
+#### 协作流程
+```csharp
+// 需求分析协作检查清单
+public class RequirementAnalysisChecklist
+{
+    public bool ProductRequirementDocumentCompleted { get; set; }
+    public bool TechnicalArchitectureApproved { get; set; }
+    public bool UIPrototypeReviewed { get; set; }
+    public bool TestStrategyDefined { get; set; }
+    public bool AcceptanceCriteriaAgreed { get; set; }
+}
+```
+
+### Phase 2: 开发准备阶段 (3-5天)
+
+#### 协作任务
+
+**架构师 + 开发工程师**:
+```csharp
+// 项目结构初始化
+public class ProjectSetup
+{
+    public void InitializeProjectStructure()
+    {
+        // 参考: csharp-windows-app-development.mdc - 项目目录结构
+        CreateSolutionStructure();
+        SetupDependencyInjection();
+        ConfigureLogging();
+        SetupDatabase();
+    }
+    
+    private void CreateSolutionStructure()
+    {
+        // src/ProjectName.Core/
+        // src/ProjectName.Data/  
+        // src/ProjectName.UI/
+        // tests/ProjectName.Tests.Unit/
+        // tests/ProjectName.Tests.Integration/
+        // tests/ProjectName.Tests.UI/
+    }
+}
+```
+
+**UI工程师 + 开发工程师**:
+```xaml
+<!-- 设计系统建立 - 参考: ui-design-guidelines.mdc -->
+<ResourceDictionary>
+    <!-- 主题色板定义 -->
+    <Color x:Key="PrimaryColor">#1976D2</Color>
+    <Color x:Key="AccentColor">#FF4081</Color>
+    
+    <!-- 字体系统 -->
+    <FontFamily x:Key="PrimaryFont">Microsoft YaHei UI</FontFamily>
+    
+    <!-- 组件样式库 -->
+    <Style x:Key="PrimaryButton" TargetType="Button">
+        <!-- 样式定义 -->
+    </Style>
+</ResourceDictionary>
+```
+
+**测试工程师**:
+```csharp
+// 测试环境搭建 - 参考: testing-engineer-guide.mdc
+public class TestEnvironmentSetup
+{
+    public void SetupTestInfrastructure()
+    {
+        ConfigureUnitTestFramework();
+        SetupMockingFramework();
+        ConfigureTestDatabase();
+        SetupUITestFramework();
+        ConfigureCoverageTools();
+    }
+}
+```
+
+### Phase 3: 迭代开发阶段 (2-4周)
+
+#### 日常协作模式
+
+**Daily Standup会议** (每日15分钟):
+```csharp
+public class DailyStandupAgenda
+{
+    public string[] DeveloperUpdates { get; set; } // 开发进度
+    public string[] UIEngineerUpdates { get; set; } // UI实现状态
+    public string[] TestEngineerUpdates { get; set; } // 测试执行情况
+    public string[] Blockers { get; set; } // 阻塞问题
+    public string[] Dependencies { get; set; } // 依赖关系
+}
+```
+
+#### Sprint计划协作
+
+**Story分解示例**:
+```csharp
+public class UserStory
+{
+    public string Title { get; set; } = "用户登录功能";
+    public List<Task> DevelopmentTasks { get; set; } = new()
+    {
+        new Task { Owner = "开发工程师", Description = "实现用户认证服务" },
+        new Task { Owner = "开发工程师", Description = "创建用户实体和仓储" },
+    };
+    
+    public List<Task> UITasks { get; set; } = new()
+    {
+        new Task { Owner = "UI工程师", Description = "设计登录界面" },
+        new Task { Owner = "UI工程师", Description = "实现登录页面XAML" },
+        new Task { Owner = "UI工程师", Description = "创建ViewModel绑定" },
+    };
+    
+    public List<Task> TestTasks { get; set; } = new()
+    {
+        new Task { Owner = "测试工程师", Description = "编写用户服务单元测试" },
+        new Task { Owner = "测试工程师", Description = "编写登录UI自动化测试" },
+        new Task { Owner = "测试工程师", Description = "执行集成测试" },
+    };
+}
+```
+
+### Phase 4: 代码审查与质量保证
+
+#### 多角色Code Review流程
+
+```yaml
+# .github/pull_request_template.md
+## Pull Request检查清单
+
+### 开发工程师检查项
+- [ ] 代码符合命名规范 (参考: csharp-windows-app-development.mdc)
+- [ ] 实现了SOLID原则
+- [ ] 包含适当的错误处理
+- [ ] 数据库操作使用事务处理
+- [ ] 异步方法正确使用async/await
+
+### UI工程师检查项  
+- [ ] UI符合设计规范 (参考: ui-design-guidelines.mdc)
+- [ ] 响应式布局实现正确
+- [ ] 样式使用统一的设计系统
+- [ ] 支持键盘导航和可访问性
+- [ ] 动画效果符合UX标准
+
+### 测试工程师检查项
+- [ ] 单元测试覆盖率 ≥ 80% (参考: testing-engineer-guide.mdc)
+- [ ] 集成测试完整
+- [ ] UI测试覆盖关键用户流程
+- [ ] 性能测试通过
+- [ ] 无安全漏洞
+```
+
+#### 质量门禁标准
+
+```csharp
+public class QualityGate
+{
+    public bool PassesCodeReview { get; set; }
+    public bool UnitTestCoverage => Coverage >= 80;
+    public bool IntegrationTestsPassed { get; set; }
+    public bool UITestsPassed { get; set; }
+    public bool PerformanceTestsPassed { get; set; }
+    public bool SecurityScanPassed { get; set; }
+    public bool DesignReviewApproved { get; set; }
+    
+    public double Coverage { get; set; }
+    
+    public bool CanDeploy => PassesCodeReview && 
+                           UnitTestCoverage && 
+                           IntegrationTestsPassed && 
+                           UITestsPassed && 
+                           PerformanceTestsPassed && 
+                           SecurityScanPassed && 
+                           DesignReviewApproved;
+}
+```
+
+## 协作工具和流程
+
+### 分支策略和协作
+
+```
+Git Flow分支模型:
+main (生产)
+├── develop (开发主分支)
+│   ├── feature/login-ui (UI工程师)
+│   ├── feature/user-service (开发工程师)  
+│   ├── feature/login-tests (测试工程师)
+│   └── release/v1.0.0
+└── hotfix/critical-bug
+```
+
+### 持续集成流程
+
+```yaml
+# .github/workflows/ci.yml
+name: Team Collaboration CI/CD
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    
+    # 开发工程师关注的构建步骤
+    - name: Restore and Build
+      run: |
+        dotnet restore
+        dotnet build --configuration Release
+    
+    # 测试工程师关注的测试步骤  
+    - name: Unit Tests
+      run: dotnet test tests/ProjectName.Tests.Unit --collect:"XPlat Code Coverage"
+      
+    - name: Integration Tests  
+      run: dotnet test tests/ProjectName.Tests.Integration
+      
+    - name: UI Tests
+      run: dotnet test tests/ProjectName.Tests.UI
+    
+    # UI工程师关注的设计验证
+    - name: Visual Regression Tests
+      run: npm run visual-tests
+      
+    - name: Accessibility Tests
+      run: npm run a11y-tests
+    
+    # 质量报告生成
+    - name: Generate Reports
+      run: |
+        reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage
+        dotnet tool run dotnet-reportgenerator -reports:coverage.xml -targetdir:coverage-html
+```
+
+## 沟通协作机制
+
+### 会议节奏
+
+```csharp
+public class MeetingSchedule
+{
+    public Meeting DailyStandup { get; set; } = new()
+    {
+        Duration = TimeSpan.FromMinutes(15),
+        Frequency = "Daily",
+        Participants = new[] { "开发工程师", "UI工程师", "测试工程师", "Scrum Master" }
+    };
+    
+    public Meeting SprintPlanning { get; set; } = new()
+    {
+        Duration = TimeSpan.FromHours(4),
+        Frequency = "Sprint开始",
+        Participants = new[] { "全体团队成员", "产品经理" }
+    };
+    
+    public Meeting DesignReview { get; set; } = new()
+    {
+        Duration = TimeSpan.FromHours(2),
+        Frequency = "每Sprint",
+        Participants = new[] { "UI工程师", "开发工程师", "产品经理" }
+    };
+    
+    public Meeting CodeReview { get; set; } = new()
+    {
+        Duration = TimeSpan.FromHours(1),
+        Frequency = "每周",
+        Participants = new[] { "开发工程师", "架构师", "测试工程师" }
+    };
+}
+```
+
+### 文档协作规范
+
+```csharp
+public class DocumentationStandards
+{
+    public string[] RequiredDocuments { get; set; } = 
+    {
+        "架构设计文档 (架构师负责)",
+        "API文档 (开发工程师负责)", 
+        "UI设计规范 (UI工程师负责)",
+        "测试计划和报告 (测试工程师负责)",
+        "部署指南 (DevOps工程师负责)"
+    };
+    
+    public string DocumentationTool { get; set; } = "GitBook/Confluence";
+    public string CodeDocumentation { get; set; } = "XML注释 + Swagger";
+    public string DesignDocumentation { get; set; } = "Figma + Storybook";
+}
+```
+
+## 质量标准协作
+
+### 代码质量标准
+
+```csharp
+// 统一的代码质量检查 - 所有角色共同遵守
+public class CodeQualityStandards
+{
+    // 开发工程师主要负责
+    public class DevelopmentStandards
+    {
+        public bool FollowsNamingConventions { get; set; } // PascalCase, camelCase
+        public bool HasProperErrorHandling { get; set; }
+        public bool UsesAsyncAwaitCorrectly { get; set; }
+        public bool FollowsSOLIDPrinciples { get; set; }
+    }
+    
+    // UI工程师主要负责
+    public class UIStandards  
+    {
+        public bool FollowsDesignSystem { get; set; }
+        public bool ResponsiveDesign { get; set; }
+        public bool AccessibilityCompliant { get; set; }
+        public bool PerformanceOptimized { get; set; }
+    }
+    
+    // 测试工程师主要负责
+    public class TestStandards
+    {
+        public double UnitTestCoverage { get; set; } // >= 80%
+        public bool IntegrationTestsComplete { get; set; }
+        public bool UITestsComplete { get; set; }
+        public bool PerformanceTestsPassed { get; set; }
+    }
+}
+```
+
+### 定义of Done (DoD)
+
+```csharp
+public class DefinitionOfDone
+{
+    public bool[] DeveloperChecklist { get; set; } = 
+    {
+        true, // 代码实现完成
+        true, // 单元测试编写
+        true, // 代码审查通过
+        true, // 集成测试通过
+        true, // 文档更新
+    };
+    
+    public bool[] UIEngineerChecklist { get; set; } = 
+    {
+        true, // UI设计实现
+        true, // 响应式布局测试
+        true, // 可访问性验证
+        true, // 跨浏览器测试
+        true, // 设计审查通过
+    };
+    
+    public bool[] TestEngineerChecklist { get; set; } = 
+    {
+        true, // 测试用例编写
+        true, // 自动化测试执行
+        true, // 测试报告生成
+        true, // 缺陷跟踪完成
+        true, // 回归测试通过
+    };
+    
+    public bool IsFeatureComplete => 
+        DeveloperChecklist.All(x => x) && 
+        UIEngineerChecklist.All(x => x) && 
+        TestEngineerChecklist.All(x => x);
+}
+```
+
+## 项目管理和交付
+
+### Sprint计划模板
+
+```csharp
+public class SprintPlan
+{
+    public string SprintGoal { get; set; }
+    public TimeSpan Duration { get; set; } = TimeSpan.FromDays(14);
+    
+    public List<UserStory> Stories { get; set; }
+    public List<TechnicalTask> TechnicalTasks { get; set; }
+    public List<UITask> DesignTasks { get; set; }
+    public List<TestTask> TestingTasks { get; set; }
+    
+    public SprintCapacity Capacity { get; set; } = new()
+    {
+        DeveloperDays = 8,
+        UIEngineerDays = 6,
+        TestEngineerDays = 8,
+        BufferDays = 2 // 用于风险缓冲
+    };
+}
+```
+
+### 风险管理
+
+```csharp
+public class RiskManagement
+{
+    public Risk[] CommonRisks { get; set; } = 
+    {
+        new Risk 
+        { 
+            Description = "UI设计与开发实现不一致",
+            Mitigation = "增加设计review频率，使用设计系统",
+            Owner = "UI工程师 + 开发工程师"
+        },
+        new Risk 
+        { 
+            Description = "测试覆盖率不足",
+            Mitigation = "设置质量门禁，每日监控覆盖率",
+            Owner = "测试工程师"
+        },
+        new Risk 
+        { 
+            Description = "性能问题发现太晚",
+            Mitigation = "集成性能测试到CI/CD流水线",
+            Owner = "测试工程师 + DevOps工程师"
+        }
+    };
+}
+
+public class Risk
+{
+    public string Description { get; set; }
+    public string Mitigation { get; set; }
+    public string Owner { get; set; }
+    public RiskLevel Level { get; set; }
+}
+
+public enum RiskLevel { Low, Medium, High, Critical }
+```
+
+## 团队成长和改进
+
+### 技能矩阵
+
+```csharp
+public class TeamSkillMatrix
+{
+    public Dictionary<string, SkillLevel> DeveloperSkills { get; set; } = new()
+    {
+        ["C#/.NET"] = SkillLevel.Expert,
+        ["WPF/MVVM"] = SkillLevel.Advanced,
+        ["SQLite/EF Core"] = SkillLevel.Intermediate,
+        ["单元测试"] = SkillLevel.Advanced,
+        ["UI设计理解"] = SkillLevel.Basic
+    };
+    
+    public Dictionary<string, SkillLevel> UIEngineerSkills { get; set; } = new()
+    {
+        ["XAML/WPF"] = SkillLevel.Expert,
+        ["设计系统"] = SkillLevel.Advanced,
+        ["用户体验"] = SkillLevel.Expert,
+        ["C#开发理解"] = SkillLevel.Intermediate,
+        ["测试理解"] = SkillLevel.Basic
+    };
+    
+    public Dictionary<string, SkillLevel> TestEngineerSkills { get; set; } = new()
+    {
+        ["自动化测试"] = SkillLevel.Expert,
+        ["性能测试"] = SkillLevel.Advanced,
+        ["C#/.NET"] = SkillLevel.Intermediate,
+        ["UI测试"] = SkillLevel.Advanced,
+        ["安全测试"] = SkillLevel.Intermediate
+    };
+}
+
+public enum SkillLevel { Basic, Intermediate, Advanced, Expert }
+```
+
+### 知识分享计划
+
+```csharp
+public class KnowledgeSharingPlan
+{
+    public Session[] RegularSessions { get; set; } = 
+    {
+        new Session 
+        {
+            Title = "代码质量最佳实践",
+            Presenter = "资深开发工程师",
+            Audience = "全体开发人员",
+            Frequency = "每月"
+        },
+        new Session 
+        {
+            Title = "UI/UX设计趋势分享", 
+            Presenter = "UI工程师",
+            Audience = "开发团队",
+            Frequency = "每季度"
+        },
+        new Session 
+        {
+            Title = "测试策略和工具分享",
+            Presenter = "测试工程师", 
+            Audience = "全体团队",
+            Frequency = "每月"
+        }
+    };
+}
+```
+
+## 交付和部署协作
+
+### 发布准备检查清单
+
+```csharp
+public class ReleaseReadinessChecklist
+{
+    public bool[] DevelopmentChecklist { get; set; } = 
+    {
+        false, // 所有功能开发完成
+        false, // 代码审查通过
+        false, // 性能优化完成
+        false, // 安全扫描通过
+        false, // 文档更新完成
+    };
+    
+    public bool[] UIChecklist { get; set; } = 
+    {
+        false, // UI组件完成
+        false, // 响应式测试完成  
+        false, // 可访问性验证通过
+        false, // 用户体验测试完成
+        false, // 视觉回归测试通过
+    };
+    
+    public bool[] TestingChecklist { get; set; } = 
+    {
+        false, // 全部测试用例执行完成
+        false, // 缺陷修复验证完成
+        false, // 性能测试通过
+        false, // 兼容性测试完成
+        false, // 验收测试通过
+    };
+    
+    public bool ReadyForRelease => 
+        DevelopmentChecklist.All(x => x) && 
+        UIChecklist.All(x => x) && 
+        TestingChecklist.All(x => x);
+}
+```
+
+---
+
+## 总结
+
+本协作指南整合了三个关键角色的工作流程：
+
+1. **[开发工程师](mdc:csharp-windows-app-development.mdc)**: 负责核心业务逻辑实现、架构设计和代码质量
+2. **[测试工程师](mdc:testing-engineer-guide.mdc)**: 负责质量保证、自动化测试和性能验证  
+3. **[UI工程师](mdc:ui-design-guidelines.mdc)**: 负责用户界面设计、用户体验和视觉一致性
+
+通过明确的角色分工、标准化的流程和有效的沟通机制，确保团队高效协作，交付高质量的Windows桌面应用程序。
+
+**关键成功因素**:
+- 遵循各自专业领域的最佳实践
+- 建立跨角色的质量标准
+- 保持频繁的沟通和反馈
+- 持续改进协作流程
+- 共同承担项目成功责任

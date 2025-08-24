@@ -1,0 +1,362 @@
+---
+description: C#.NET Windows桌面应用UI设计规范和最佳实践
+globs: *.xaml,*.xaml.cs,*.Designer.cs
+---
+
+# C#.NET Windows桌面应用UI设计规范
+
+## UI设计原则
+
+### 设计哲学
+- **一致性**: 保持整个应用程序的视觉和交互一致
+- **简洁性**: 界面简洁清晰，避免视觉混乱
+- **响应性**: 操作反馈及时，提供加载状态指示
+- **可访问性**: 支持不同分辨率和DPI缩放
+
+### 布局规范
+
+#### 网格系统
+```xaml
+<!-- 标准网格定义 -->
+<Grid>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="Auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="120"/>
+    </Grid.ColumnDefinitions>
+    <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="40"/>
+    </Grid.RowDefinitions>
+</Grid>
+```
+
+#### 间距标准
+```xaml
+<!-- 标准边距 -->
+<Style TargetType="FrameworkElement">
+    <Setter Property="Margin" Value="8"/>
+    <Setter Property="Padding" Value="12,8"/>
+</Style>
+
+<!-- 组件间距 -->
+<StackPanel Margin="16">
+    <TextBlock Text="标题" Margin="0,0,0,8"/>
+    <TextBox Margin="0,0,0,16"/>
+    <Button Content="确定" Margin="0,8,0,0"/>
+</StackPanel>
+```
+
+### 颜色规范
+
+#### 主题色板
+```xaml
+<ResourceDictionary>
+    <!-- 主色调 -->
+    <Color x:Key="PrimaryColor">#1976D2</Color>
+    <Color x:Key="PrimaryLightColor">#42A5F5</Color>
+    <Color x:Key="PrimaryDarkColor">#1565C0</Color>
+    
+    <!-- 辅助色 -->
+    <Color x:Key="AccentColor">#FF4081</Color>
+    <Color x:Key="AccentLightColor">#FF80AB</Color>
+    <Color x:Key="AccentDarkColor">#F50057</Color>
+    
+    <!-- 功能色 -->
+    <Color x:Key="SuccessColor">#4CAF50</Color>
+    <Color x:Key="WarningColor">#FFC107</Color>
+    <Color x:Key="ErrorColor">#F44336</Color>
+    <Color x:Key="InfoColor">#2196F3</Color>
+</ResourceDictionary>
+```
+
+### 字体规范
+
+#### 字体定义
+```xaml
+<ResourceDictionary>
+    <!-- 字体族 -->
+    <FontFamily x:Key="PrimaryFont">Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="SecondaryFont">SimSun</FontFamily>
+    
+    <!-- 字号定义 -->
+    <system:Double x:Key="HeadingLargeSize">24</system:Double>
+    <system:Double x:Key="HeadingSize">20</system:Double>
+    <system:Double x:Key="SubheadingSize">16</system:Double>
+    <system:Double x:Key="BodySize">14</system:Double>
+    <system:Double x:Key="CaptionSize">12</system:Double>
+</ResourceDictionary>
+```
+
+### 控件样式规范
+
+#### 按钮样式
+```xaml
+<!-- 主要按钮 -->
+<Style x:Key="PrimaryButton" TargetType="Button">
+    <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+    <Setter Property="Foreground" Value="White"/>
+    <Setter Property="Padding" Value="16,8"/>
+    <Setter Property="MinWidth" Value="80"/>
+    <Setter Property="Template">
+        <Setter.Value>
+            <ControlTemplate TargetType="Button">
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="4">
+                    <ContentPresenter HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"/>
+                </Border>
+            </ControlTemplate>
+        </Setter.Value>
+    </Setter>
+</Style>
+
+<!-- 次要按钮 -->
+<Style x:Key="SecondaryButton" TargetType="Button">
+    <Setter Property="Background" Value="Transparent"/>
+    <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+    <Setter Property="Foreground" Value="{StaticResource PrimaryColor}"/>
+    <Setter Property="BorderThickness" Value="1"/>
+</Style>
+```
+
+#### 文本框样式
+```xaml
+<Style x:Key="StandardTextBox" TargetType="TextBox">
+    <Setter Property="Height" Value="32"/>
+    <Setter Property="Padding" Value="8,4"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="VerticalContentAlignment" Value="Center"/>
+</Style>
+```
+
+### 图标规范
+
+#### 图标尺寸
+```xaml
+<ResourceDictionary>
+    <!-- 图标尺寸定义 -->
+    <system:Double x:Key="IconSizeLarge">32</system:Double>
+    <system:Double x:Key="IconSizeMedium">24</system:Double>
+    <system:Double x:Key="IconSizeSmall">16</system:Double>
+    
+    <!-- 图标样式 -->
+    <Style x:Key="StandardIcon" TargetType="Image">
+        <Setter Property="Width" Value="{StaticResource IconSizeMedium}"/>
+        <Setter Property="Height" Value="{StaticResource IconSizeMedium}"/>
+        <Setter Property="RenderOptions.BitmapScalingMode" Value="HighQuality"/>
+    </Style>
+</ResourceDictionary>
+```
+
+## 响应式设计
+
+### 窗口尺寸适配
+```xaml
+<Window x:Class="YourApp.MainWindow"
+        MinWidth="800"
+        MinHeight="600"
+        SizeToContent="WidthAndHeight">
+    <Grid>
+        <!-- 使用Star尺寸实现响应式布局 -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.3*" MinWidth="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+    </Grid>
+</Window>
+```
+
+### DPI缩放支持
+```xaml
+<!-- App.xaml -->
+<Application x:Class="YourApp.App"
+             DispatcherUnhandledException="App_DispatcherUnhandledException">
+    <Application.Resources>
+        <!-- 确保应用程序支持DPI缩放 -->
+        <Style TargetType="{x:Type Window}">
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+            <Setter Property="UseLayoutRounding" Value="True"/>
+        </Style>
+    </Application.Resources>
+</Application>
+```
+
+## 用户交互规范
+
+### 输入验证
+```xaml
+<TextBox>
+    <TextBox.Style>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip"
+                            Value="{Binding RelativeSource={RelativeSource Self},
+                                   Path=(Validation.Errors)[0].ErrorContent}"/>
+                    <Setter Property="BorderBrush" Value="{StaticResource ErrorColor}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </TextBox.Style>
+</TextBox>
+```
+
+### 加载状态
+```xaml
+<!-- 加载指示器 -->
+<Grid>
+    <ContentPresenter x:Name="MainContent"/>
+    <Grid x:Name="LoadingOverlay" 
+          Background="#80000000" 
+          Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibility}}">
+        <ProgressBar IsIndeterminate="True" 
+                     Width="100" Height="2"/>
+    </Grid>
+</Grid>
+```
+
+## 动画效果规范
+
+### 过渡动画
+```xaml
+<Style x:Key="FadeInControl" TargetType="FrameworkElement">
+    <Style.Triggers>
+        <Trigger Property="Visibility" Value="Visible">
+            <Trigger.EnterActions>
+                <BeginStoryboard>
+                    <Storyboard>
+                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                       From="0" To="1" Duration="0:0:0.3"/>
+                    </Storyboard>
+                </BeginStoryboard>
+            </Trigger.EnterActions>
+        </Trigger>
+    </Style.Triggers>
+</Style>
+```
+
+### 按钮动画
+```xaml
+<Style x:Key="AnimatedButton" TargetType="Button">
+    <Style.Triggers>
+        <EventTrigger RoutedEvent="MouseEnter">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation Storyboard.TargetProperty="(Button.RenderTransform).(ScaleTransform.ScaleX)"
+                                   To="1.1" Duration="0:0:0.1"/>
+                    <DoubleAnimation Storyboard.TargetProperty="(Button.RenderTransform).(ScaleTransform.ScaleY)"
+                                   To="1.1" Duration="0:0:0.1"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Style.Triggers>
+</Style>
+```
+
+## 错误处理和反馈
+
+### 错误提示
+```xaml
+<UserControl>
+    <!-- 错误消息展示 -->
+    <Border x:Name="ErrorMessage"
+            Background="{StaticResource ErrorColor}"
+            Padding="16,8"
+            CornerRadius="4"
+            Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}">
+        <TextBlock Text="{Binding ErrorMessage}"
+                   Foreground="White"/>
+    </Border>
+</UserControl>
+```
+
+### 操作反馈
+```xaml
+<!-- 操作成功提示 -->
+<Border x:Name="SuccessToast"
+        Background="{StaticResource SuccessColor}"
+        Padding="16,8"
+        CornerRadius="4">
+    <TextBlock Text="操作成功"
+               Foreground="White"/>
+</Border>
+```
+
+## 辅助功能支持
+
+### 键盘导航
+```xaml
+<StackPanel>
+    <TextBox TabIndex="0" KeyboardNavigation.TabNavigation="Local"/>
+    <ComboBox TabIndex="1"/>
+    <Button TabIndex="2" Content="确定"/>
+</StackPanel>
+```
+
+### 屏幕阅读器支持
+```xaml
+<Button Content="添加用户"
+        AutomationProperties.Name="添加新用户按钮"
+        AutomationProperties.HelpText="点击此按钮打开添加用户对话框"/>
+```
+
+## 性能优化
+
+### 虚拟化支持
+```xaml
+<ListBox VirtualizingStackPanel.IsVirtualizing="True"
+         VirtualizingStackPanel.VirtualizationMode="Recycling"
+         ScrollViewer.IsDeferredScrollingEnabled="True">
+    <ListBox.ItemsPanel>
+        <ItemsPanelTemplate>
+            <VirtualizingStackPanel/>
+        </ItemsPanelTemplate>
+    </ListBox.ItemsPanel>
+</ListBox>
+```
+
+### 图像优化
+```xaml
+<Image Source="{Binding ImagePath}"
+       RenderOptions.BitmapScalingMode="HighQuality"
+       RenderOptions.EdgeMode="Aliased"
+       CacheMode="BitmapCache"/>
+```
+
+## 最佳实践提示
+
+1. **布局设计**
+   - 使用Grid进行复杂布局
+   - 避免深层嵌套布局
+   - 合理使用Margin和Padding
+
+2. **样式管理**
+   - 将样式定义在ResourceDictionary中
+   - 使用主题色和品牌色
+   - 保持视觉一致性
+
+3. **性能考虑**
+   - 启用UI虚拟化
+   - 使用适当的图像优化
+   - 避免过度使用动画效果
+
+4. **可访问性**
+   - 支持键盘导航
+   - 提供适当的自动化属性
+   - 确保足够的颜色对比度
+
+5. **响应式设计**
+   - 使用相对单位和Grid的Star尺寸
+   - 设置合理的最小尺寸
+   - 支持不同DPI缩放
+
+---
+
+**重要提醒**:
+1. 始终遵循设计规范保持一致性
+2. 优先考虑用户体验和可用性
+3. 注意性能优化和响应式设计
+4. 保持代码的可维护性和可重用性
+5. 定期进行UI审查和用户测试

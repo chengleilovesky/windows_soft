@@ -1,0 +1,537 @@
+---
+description: C#.NET Windows桌面应用测试工程师开发指南和最佳实践
+globs: *Test*.cs,*Tests.cs,*.Test.cs
+---
+
+# C#.NET Windows桌面应用测试工程师指南
+
+## 测试工程师职责和目标
+
+作为测试工程师，您需要确保C#.NET Windows桌面应用的质量、稳定性和用户体验。主要职责包括：
+
+- **质量保障**: 设计和执行全面的测试策略
+- **自动化测试**: 建立可维护的自动化测试框架
+- **性能测试**: 确保应用在不同环境下的性能表现
+- **UI/UX测试**: 验证用户界面的功能性和可用性
+- **回归测试**: 确保新功能不破坏现有功能
+
+## 测试架构和分层
+
+### 测试金字塔结构
+```
+    UI Tests (10%)
+   ─────────────────
+  Integration Tests (20%)
+ ───────────────────────────
+Unit Tests (70%)
+```
+
+### 测试项目结构
+```
+tests/
+├── ProjectName.Tests.Unit/           # 单元测试
+│   ├── Core/
+│   │   ├── Services/                # 业务服务测试
+│   │   ├── Models/                  # 数据模型测试
+│   │   └── Extensions/              # 扩展方法测试
+│   ├── Data/
+│   │   ├── Repositories/            # 仓储测试
+│   │   └── Context/                 # 数据库上下文测试
+│   └── Common/
+│       ├── Helpers/                 # 辅助类测试
+│       └── Utilities/               # 工具类测试
+├── ProjectName.Tests.Integration/    # 集成测试
+│   ├── Database/                    # 数据库集成测试
+│   ├── Services/                    # 服务集成测试
+│   └── External/                    # 外部依赖集成测试
+└── ProjectName.Tests.UI/            # UI测试
+    ├── Views/                       # 视图测试
+    ├── ViewModels/                  # 视图模型测试
+    └── Controls/                    # 自定义控件测试
+```
+
+## 单元测试规范
+
+### 测试命名约定
+```csharp
+// 格式: [被测方法]_[测试场景]_[期望结果]
+[Test]
+public void GetUserById_WithValidId_ReturnsUser()
+{
+    // Arrange, Act, Assert
+}
+
+[Test]
+public void GetUserById_WithInvalidId_ThrowsArgumentException()
+{
+    // 测试实现
+}
+
+[Test]
+public void CalculateTotal_WithEmptyCart_ReturnsZero()
+{
+    // 测试实现
+}
+```
+
+### 测试类结构
+```csharp
+[TestFixture]
+public class UserServiceTests
+{
+    private UserService _userService;
+    private Mock<IUserRepository> _mockRepository;
+    private Mock<ILogger<UserService>> _mockLogger;
+    
+    [SetUp]
+    public void Setup()
+    {
+        _mockRepository = new Mock<IUserRepository>();
+        _mockLogger = new Mock<ILogger<UserService>>();
+        _userService = new UserService(_mockRepository.Object, _mockLogger.Object);
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        _userService?.Dispose();
+    }
+    
+    [Test]
+    public async Task GetUserAsync_ValidId_ReturnsUser()
+    {
+        // Arrange
+        var userId = 1;
+        var expectedUser = new User { Id = userId, Name = "Test User" };
+        _mockRepository.Setup(r => r.GetByIdAsync(userId))
+                      .ReturnsAsync(expectedUser);
+        
+        // Act
+        var result = await _userService.GetUserAsync(userId);
+        
+        // Assert
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.Id, Is.EqualTo(userId));
+        Assert.That(result.Name, Is.EqualTo("Test User"));
+        _mockRepository.Verify(r => r.GetByIdAsync(userId), Times.Once);
+    }
+}
+```
+
+### 必需的测试NuGet包
+```xml
+<PackageReference Include="NUnit" Version="3.14.0" />
+<PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+<PackageReference Include="Moq" Version="4.20.69" />
+<PackageReference Include="FluentAssertions" Version="6.12.0" />
+<PackageReference Include="Bogus" Version="34.0.2" />
+<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />
+```
+
+## 模拟和测试数据
+
+### 使用Moq进行模拟
+```csharp
+// 设置返回值
+_mockRepository.Setup(r => r.GetByIdAsync(It.IsAny<int>()))
+              .ReturnsAsync(new User());
+
+// 设置异常
+_mockRepository.Setup(r => r.GetByIdAsync(It.Is<int>(id => id <= 0)))
+              .ThrowsAsync(new ArgumentException("Invalid ID"));
+
+// 验证调用
+_mockRepository.Verify(r => r.SaveAsync(It.IsAny<User>()), Times.Once);
+_mockRepository.Verify(r => r.DeleteAsync(It.IsAny<int>()), Times.Never);
+```
+
+### 使用Bogus生成测试数据
+```csharp
+public class TestDataBuilder
+{
+    private static readonly Faker<User> UserFaker = new Faker<User>()
+        .RuleFor(u => u.Id, f => f.Random.Int(1, 1000))
+        .RuleFor(u => u.Name, f => f.Person.FullName)
+        .RuleFor(u => u.Email, f => f.Person.Email)
+        .RuleFor(u => u.CreatedDate, f => f.Date.Past());
+    
+    public static User CreateUser() => UserFaker.Generate();
+    public static List<User> CreateUsers(int count) => UserFaker.Generate(count);
+}
+```
+
+## 数据库测试
+
+### SQLite内存数据库测试
+```csharp
+[TestFixture]
+public class UserRepositoryTests
+{
+    private ApplicationDbContext _context;
+    private UserRepository _repository;
+    
+    [SetUp]
+    public void Setup()
+    {
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        
+        _context = new ApplicationDbContext(options);
+        _repository = new UserRepository(_context);
+        
+        // 种子数据
+        SeedTestData();
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        _context.Dispose();
+    }
+    
+    private void SeedTestData()
+    {
+        var users = TestDataBuilder.CreateUsers(5);
+        _context.Users.AddRange(users);
+        _context.SaveChanges();
+    }
+    
+    [Test]
+    public async Task GetByIdAsync_ExistingUser_ReturnsUser()
+    {
+        // Arrange
+        var existingUser = await _context.Users.FirstAsync();
+        
+        // Act
+        var result = await _repository.GetByIdAsync(existingUser.Id);
+        
+        // Assert
+        result.Should().NotBeNull();
+        result.Id.Should().Be(existingUser.Id);
+    }
+}
+```
+
+## WPF/WinForms UI测试
+
+### ViewModel测试
+```csharp
+[TestFixture]
+public class UserViewModelTests
+{
+    private UserViewModel _viewModel;
+    private Mock<IUserService> _mockUserService;
+    
+    [SetUp]
+    public void Setup()
+    {
+        _mockUserService = new Mock<IUserService>();
+        _viewModel = new UserViewModel(_mockUserService.Object);
+    }
+    
+    [Test]
+    public async Task LoadUsersCommand_Execute_LoadsUsers()
+    {
+        // Arrange
+        var testUsers = TestDataBuilder.CreateUsers(3);
+        _mockUserService.Setup(s => s.GetAllUsersAsync())
+                       .ReturnsAsync(testUsers);
+        
+        // Act
+        await _viewModel.LoadUsersCommand.ExecuteAsync(null);
+        
+        // Assert
+        _viewModel.Users.Should().HaveCount(3);
+        _viewModel.IsLoading.Should().BeFalse();
+    }
+    
+    [Test]
+    public void UserName_PropertyChanged_RaisesPropertyChangedEvent()
+    {
+        // Arrange
+        var propertyChangedRaised = false;
+        _viewModel.PropertyChanged += (sender, args) =>
+        {
+            if (args.PropertyName == nameof(UserViewModel.UserName))
+                propertyChangedRaised = true;
+        };
+        
+        // Act
+        _viewModel.UserName = "New Name";
+        
+        // Assert
+        propertyChangedRaised.Should().BeTrue();
+    }
+}
+```
+
+### WPF控件测试（使用FlaUI）
+```csharp
+[TestFixture]
+public class MainWindowUITests
+{
+    private Application _app;
+    private Window _mainWindow;
+    
+    [SetUp]
+    public void Setup()
+    {
+        var appPath = Path.Combine(TestContext.CurrentContext.TestDirectory, "YourApp.exe");
+        _app = Application.Launch(appPath);
+        _mainWindow = _app.GetMainWindow(TimeSpan.FromSeconds(10));
+    }
+    
+    [TearDown]
+    public void TearDown()
+    {
+        _app?.Close();
+        _app?.Dispose();
+    }
+    
+    [Test]
+    public void ClickAddUserButton_OpensAddUserDialog()
+    {
+        // Arrange
+        var addButton = _mainWindow.FindFirstDescendant(cf => cf.ByAutomationId("AddUserButton"));
+        
+        // Act
+        addButton.Click();
+        
+        // Assert
+        var dialog = _app.GetAllTopLevelWindows(TimeSpan.FromSeconds(5))
+                        .FirstOrDefault(w => w.Name == "Add User");
+        dialog.Should().NotBeNull();
+    }
+}
+```
+
+## 集成测试
+
+### Web API集成测试
+```csharp
+[TestFixture]
+public class UserApiIntegrationTests
+{
+    private WebApplicationFactory<Program> _factory;
+    private HttpClient _client;
+    
+    [SetUp]
+    public void Setup()
+    {
+        _factory = new WebApplicationFactory<Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureServices(services =>
+                {
+                    // 替换为测试数据库
+                    services.AddDbContext<ApplicationDbContext>(options =>
+                        options.UseInMemoryDatabase("TestDb"));
+                });
+            });
+        
+        _client = _factory.CreateClient();
+    }
+    
+    [Test]
+    public async Task GetUsers_ReturnsSuccessStatusCode()
+    {
+        // Act
+        var response = await _client.GetAsync("/api/users");
+        
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+}
+```
+
+## 性能测试
+
+### 基准测试（使用BenchmarkDotNet）
+```csharp
+[MemoryDiagnoser]
+[SimpleJob(RuntimeMoniker.Net80)]
+public class UserServiceBenchmarks
+{
+    private UserService _userService;
+    private List<User> _testUsers;
+    
+    [GlobalSetup]
+    public void Setup()
+    {
+        // 初始化测试数据
+        _testUsers = TestDataBuilder.CreateUsers(10000);
+        _userService = new UserService(new InMemoryUserRepository(_testUsers));
+    }
+    
+    [Benchmark]
+    public async Task<User> GetUserById()
+    {
+        return await _userService.GetUserAsync(1);
+    }
+    
+    [Benchmark]
+    public async Task<List<User>> GetAllUsers()
+    {
+        return await _userService.GetAllUsersAsync();
+    }
+}
+```
+
+## 测试最佳实践
+
+### AAA模式 (Arrange-Act-Assert)
+```csharp
+[Test]
+public void CalculateDiscount_PremiumCustomer_Returns20Percent()
+{
+    // Arrange - 准备测试数据和依赖
+    var customer = new Customer { Type = CustomerType.Premium };
+    var order = new Order { Amount = 100 };
+    var calculator = new DiscountCalculator();
+    
+    // Act - 执行被测试的行为
+    var discount = calculator.CalculateDiscount(customer, order);
+    
+    // Assert - 验证结果
+    discount.Should().Be(20);
+}
+```
+
+### 测试隔离原则
+```csharp
+// 每个测试都应该独立，不依赖其他测试的结果
+[Test]
+public void Test1_IndependentTest()
+{
+    // 独立的测试逻辑
+}
+
+[Test]
+public void Test2_AnotherIndependentTest()
+{
+    // 不依赖Test1的结果
+}
+```
+
+### 参数化测试
+```csharp
+[TestCase(0, 0)]
+[TestCase(10, 0)]
+[TestCase(100, 10)]
+[TestCase(1000, 100)]
+public void CalculateDiscount_DifferentAmounts_ReturnsExpectedDiscount(
+    decimal amount, decimal expectedDiscount)
+{
+    // Arrange
+    var calculator = new DiscountCalculator();
+    
+    // Act
+    var result = calculator.Calculate(amount);
+    
+    // Assert
+    result.Should().Be(expectedDiscount);
+}
+```
+
+## 测试覆盖率目标
+
+### 覆盖率要求
+- **核心业务逻辑**: 90%+
+- **数据访问层**: 80%+
+- **服务层**: 85%+
+- **UI层**: 50%+
+- **整体项目**: 75%+
+
+### 覆盖率工具配置
+```xml
+<!-- 在测试项目中添加 -->
+<PackageReference Include="coverlet.collector" Version="6.0.0" />
+<PackageReference Include="ReportGenerator" Version="5.2.0" />
+```
+
+## 持续集成中的测试
+
+### GitHub Actions配置示例
+```yaml
+name: Test Suite
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build
+      run: dotnet build --no-restore
+    
+    - name: Run Unit Tests
+      run: dotnet test tests/ProjectName.Tests.Unit --no-build --verbosity normal --collect:"XPlat Code Coverage"
+    
+    - name: Run Integration Tests
+      run: dotnet test tests/ProjectName.Tests.Integration --no-build --verbosity normal
+    
+    - name: Generate Coverage Report
+      run: reportgenerator -reports:**/coverage.cobertura.xml -targetdir:coverage -reporttypes:Html
+```
+
+## 测试数据管理
+
+### 测试环境数据
+```csharp
+public static class TestDataManager
+{
+    public static void SeedDatabase(ApplicationDbContext context)
+    {
+        if (!context.Users.Any())
+        {
+            var users = new[]
+            {
+                new User { Name = "Test User 1", Email = "test1@example.com" },
+                new User { Name = "Test User 2", Email = "test2@example.com" }
+            };
+            
+            context.Users.AddRange(users);
+            context.SaveChanges();
+        }
+    }
+    
+    public static void CleanDatabase(ApplicationDbContext context)
+    {
+        context.Users.RemoveRange(context.Users);
+        context.SaveChanges();
+    }
+}
+```
+
+## 质量门禁
+
+### 测试失败处理
+- 所有单元测试必须通过
+- 代码覆盖率不能低于设定阈值
+- 集成测试失败阻止部署
+- 性能测试回归超过10%需要review
+
+### 测试报告
+- 生成详细的测试报告
+- 包含覆盖率信息
+- 性能基准对比
+- 失败测试的详细信息
+
+---
+
+**测试工程师重要提醒**:
+1. 始终遵循TDD（测试驱动开发）原则
+2. 保持测试代码的可读性和可维护性
+3. 定期review和重构测试代码
+4. 与开发团队密切协作，了解业务需求
+5. 持续学习新的测试工具和方法论
