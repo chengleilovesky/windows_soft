@@ -1,0 +1,341 @@
+<UserControl x:Class="ArmorVehicleDamageAssessment.UI.Views.SimulationCaseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="900">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 页面标题 -->
+        <StackPanel Grid.Row="0" Margin="24,24,24,16">
+            <TextBlock Text="算例管理" Style="{StaticResource TitleTextBlock}"/>
+            <TextBlock Text="管理所有仿真算例的生命周期，包括新增、编辑、删除和批量操作" 
+                       Style="{StaticResource CaptionTextBlock}"/>
+        </StackPanel>
+
+        <!-- 工具栏 -->
+        <materialDesign:Card Grid.Row="1" 
+                             materialDesign:ElevationAssist.Elevation="Dp1"
+                             Margin="16,0,16,8">
+            <Grid Margin="16,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 搜索和筛选区域 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 搜索框 -->
+                    <TextBox x:Name="SearchTextBox"
+                             Text="{Binding SearchKeyword, UpdateSourceTrigger=PropertyChanged}"
+                             materialDesign:HintAssist.Hint="搜索算例名称或描述..."
+                             materialDesign:HintAssist.IsFloating="False"
+                             materialDesign:TextFieldAssist.HasLeadingIcon="True"
+                             materialDesign:TextFieldAssist.LeadingIcon="Magnify"
+                             MinWidth="250"
+                             Margin="0,0,16,0"/>
+
+                    <!-- 类型筛选 -->
+                    <ComboBox x:Name="TypeFilterComboBox"
+                              ItemsSource="{Binding SimulationTypes}"
+                              SelectedItem="{Binding SelectedType}"
+                              DisplayMemberPath="DisplayName"
+                              materialDesign:HintAssist.Hint="类型"
+                              materialDesign:HintAssist.IsFloating="False"
+                              MinWidth="120"
+                              Margin="0,0,16,0">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem" BasedOn="{StaticResource MaterialDesignComboBoxItem}">
+                                <Setter Property="Padding" Value="12,8"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+
+                    <!-- 状态筛选 -->
+                    <ComboBox x:Name="StatusFilterComboBox"
+                              ItemsSource="{Binding SimulationStatuses}"
+                              SelectedItem="{Binding SelectedStatus}"
+                              DisplayMemberPath="DisplayName"
+                              materialDesign:HintAssist.Hint="状态"
+                              materialDesign:HintAssist.IsFloating="False"
+                              MinWidth="120"
+                              Margin="0,0,16,0">
+                        <ComboBox.ItemContainerStyle>
+                            <Style TargetType="ComboBoxItem" BasedOn="{StaticResource MaterialDesignComboBoxItem}">
+                                <Setter Property="Padding" Value="12,8"/>
+                            </Style>
+                        </ComboBox.ItemContainerStyle>
+                    </ComboBox>
+
+                    <!-- 刷新按钮 -->
+                    <Button Style="{StaticResource IconButton}"
+                            Command="{Binding RefreshCommand}"
+                            ToolTip="刷新数据"
+                            Margin="8,0,0,0">
+                        <materialDesign:PackIcon Kind="Refresh" Width="20" Height="20"/>
+                    </Button>
+                </StackPanel>
+
+                <!-- 操作按钮区域 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 新增按钮 -->
+                    <Button Style="{StaticResource PrimaryButton}"
+                            Command="{Binding CreateCaseCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="新增算例" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- 批量删除按钮 -->
+                    <Button Style="{StaticResource ErrorButton}"
+                            Command="{Binding BatchDeleteCommand}"
+                            IsEnabled="{Binding CanBatchDelete}"
+                            Margin="8,0,0,0">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="DeleteMultiple" Width="18" Height="18" VerticalAlignment="Center"/>
+                            <TextBlock Text="批量删除" Margin="6,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- 算例列表 -->
+        <materialDesign:Card Grid.Row="2" 
+                             materialDesign:ElevationAssist.Elevation="Dp1"
+                             Margin="16,0,16,8">
+            <Grid>
+                <!-- 数据网格 -->
+                <DataGrid x:Name="SimulationCasesDataGrid"
+                          ItemsSource="{Binding SimulationCases}"
+                          SelectedItem="{Binding SelectedCase}"
+                          Style="{StaticResource MaterialDataGrid}"
+                          RowStyle="{StaticResource MaterialDataGridRow}"
+                          ColumnHeaderStyle="{StaticResource MaterialDataGridColumnHeader}"
+                          CellStyle="{StaticResource MaterialDataGridCell}"
+                          Margin="8">
+
+                    <DataGrid.Columns>
+                        <!-- 选择列 -->
+                        <DataGridCheckBoxColumn Header="" 
+                                                Width="48"
+                                                Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=DataGridRow}}"
+                                                ElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnStyle}"
+                                                EditingElementStyle="{StaticResource MaterialDesignDataGridCheckBoxColumnEditingStyle}"/>
+
+                        <!-- ID列 -->
+                        <DataGridTextColumn Header="ID" 
+                                            Binding="{Binding Id}" 
+                                            Width="80"
+                                            IsReadOnly="True"/>
+
+                        <!-- 名称列 -->
+                        <DataGridTextColumn Header="算例名称" 
+                                            Binding="{Binding Name}" 
+                                            Width="200"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- 类型列 -->
+                        <DataGridTextColumn Header="类型" 
+                                            Binding="{Binding TypeDisplayName}" 
+                                            Width="120"
+                                            IsReadOnly="True"/>
+
+                        <!-- 状态列 -->
+                        <DataGridTemplateColumn Header="状态" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Background="{Binding StatusDisplayName, Converter={StaticResource StatusToBrushConverter}}"
+                                            CornerRadius="12"
+                                            Padding="8,4"
+                                            HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding StatusDisplayName}"
+                                                   Foreground="White"
+                                                   FontSize="11"
+                                                   FontWeight="Medium"
+                                                   TextAlignment="Center"/>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- 创建人列 -->
+                        <DataGridTextColumn Header="创建人" 
+                                            Binding="{Binding CreatedBy}" 
+                                            Width="100"
+                                            IsReadOnly="True"/>
+
+                        <!-- 创建时间列 -->
+                        <DataGridTextColumn Header="创建时间" 
+                                            Binding="{Binding CreatedTime, StringFormat=yyyy-MM-dd HH:mm}" 
+                                            Width="140"
+                                            IsReadOnly="True"/>
+
+                        <!-- 描述列 -->
+                        <DataGridTextColumn Header="描述" 
+                                            Binding="{Binding Description}" 
+                                            Width="*"
+                                            IsReadOnly="True">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                                    <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                                    <Setter Property="ToolTip" Value="{Binding Description}"/>
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <!-- 操作列 -->
+                        <DataGridTemplateColumn Header="操作" Width="160">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <!-- 查看按钮 -->
+                                        <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                                Command="{Binding DataContext.ViewCaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="查看详情"
+                                                Width="32" Height="32">
+                                            <materialDesign:PackIcon Kind="Eye" Width="16" Height="16"/>
+                                        </Button>
+
+                                        <!-- 编辑按钮 -->
+                                        <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                                Command="{Binding DataContext.EditCaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="编辑"
+                                                Width="32" Height="32"
+                                                Margin="4,0,0,0">
+                                            <materialDesign:PackIcon Kind="Edit" Width="16" Height="16"/>
+                                        </Button>
+
+                                        <!-- 打开路径按钮 -->
+                                        <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                                Command="{Binding DataContext.OpenWorkingPathCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="打开工作路径"
+                                                Width="32" Height="32"
+                                                Margin="4,0,0,0">
+                                            <materialDesign:PackIcon Kind="FolderOpen" Width="16" Height="16"/>
+                                        </Button>
+
+                                        <!-- 删除按钮 -->
+                                        <Button Style="{StaticResource MaterialDesignIconForegroundButton}"
+                                                Command="{Binding DataContext.DeleteCaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="删除"
+                                                Width="32" Height="32"
+                                                Margin="4,0,0,0"
+                                                Foreground="{DynamicResource ErrorBrush}">
+                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- 加载指示器 -->
+                <Grid Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Rectangle Fill="{DynamicResource MaterialDesignPaper}" Opacity="0.8"/>
+                    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                     Width="48" Height="48"
+                                     IsIndeterminate="True"/>
+                        <TextBlock Text="{Binding BusyMessage}" 
+                                   Style="{StaticResource BodyTextBlock}"
+                                   TextAlignment="Center"
+                                   Margin="0,16,0,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- 空状态 -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding HasItems, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <materialDesign:PackIcon Kind="DatabaseOff" 
+                                             Width="64" Height="64"
+                                             HorizontalAlignment="Center"
+                                             Foreground="{DynamicResource MaterialDesignBodyLight}"
+                                             Opacity="0.6"/>
+                    <TextBlock Text="暂无算例数据"
+                               Style="{StaticResource SubtitleTextBlock}"
+                               TextAlignment="Center"
+                               Margin="0,16,0,8"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                    <TextBlock Text="点击"新增算例"按钮创建您的第一个仿真算例"
+                               Style="{StaticResource BodyTextBlock}"
+                               TextAlignment="Center"
+                               Foreground="{DynamicResource MaterialDesignBodyLight}"/>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- 分页控件 -->
+        <materialDesign:Card Grid.Row="3" 
+                             materialDesign:ElevationAssist.Elevation="Dp1"
+                             Margin="16,0,16,8">
+            <Grid Margin="16,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- 统计信息 -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="共" Style="{StaticResource CaptionTextBlock}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalCount}" 
+                               FontWeight="SemiBold" 
+                               Margin="4,0"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="项" Style="{StaticResource CaptionTextBlock}" VerticalAlignment="Center"/>
+                    <TextBlock Text="，第" 
+                               Style="{StaticResource CaptionTextBlock}" 
+                               Margin="16,0,4,0"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding CurrentPage}" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="/" Style="{StaticResource CaptionTextBlock}" Margin="2,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalPages}" 
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                    <TextBlock Text="页" Style="{StaticResource CaptionTextBlock}" VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- 分页按钮 -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- 上一页 -->
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            Command="{Binding PreviousPageCommand}"
+                            ToolTip="上一页">
+                        <materialDesign:PackIcon Kind="ChevronLeft" Width="20" Height="20"/>
+                    </Button>
+
+                    <!-- 下一页 -->
+                    <Button Style="{StaticResource MaterialDesignIconButton}"
+                            Command="{Binding NextPageCommand}"
+                            ToolTip="下一页"
+                            Margin="8,0,0,0">
+                        <materialDesign:PackIcon Kind="ChevronRight" Width="20" Height="20"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

@@ -1,0 +1,70 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{8BB2217D-0F2D-451D-9A11-F04C0973C486}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8BB2217D-0F2D-451D-9A11-F04C0973C487}"
+EndProject
+
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArmorVehicleDamageAssessment.Core", "src\ArmorVehicleDamageAssessment.Core\ArmorVehicleDamageAssessment.Core.csproj", "{8BB2217D-0F2D-451D-9A11-F04C0973C488}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArmorVehicleDamageAssessment.Data", "src\ArmorVehicleDamageAssessment.Data\ArmorVehicleDamageAssessment.Data.csproj", "{8BB2217D-0F2D-451D-9A11-F04C0973C489}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArmorVehicleDamageAssessment.UI", "src\ArmorVehicleDamageAssessment.UI\ArmorVehicleDamageAssessment.UI.csproj", "{8BB2217D-0F2D-451D-9A11-F04C0973C490}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArmorVehicleDamageAssessment.Common", "src\ArmorVehicleDamageAssessment.Common\ArmorVehicleDamageAssessment.Common.csproj", "{8BB2217D-0F2D-451D-9A11-F04C0973C491}"
+EndProject
+
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArmorVehicleDamageAssessment.Tests.Unit", "tests\ArmorVehicleDamageAssessment.Tests.Unit\ArmorVehicleDamageAssessment.Tests.Unit.csproj", "{8BB2217D-0F2D-451D-9A11-F04C0973C492}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArmorVehicleDamageAssessment.Tests.Integration", "tests\ArmorVehicleDamageAssessment.Tests.Integration\ArmorVehicleDamageAssessment.Tests.Integration.csproj", "{8BB2217D-0F2D-451D-9A11-F04C0973C493}"
+EndProject
+
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8BB2217D-0F2D-451D-9A11-F04C0973C488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C489}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C489}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C489}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C489}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C490}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C490}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C490}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C490}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C491}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C491}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C491}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C491}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C492}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C492}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C492}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C492}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C493}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C493}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C493}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB2217D-0F2D-451D-9A11-F04C0973C493}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{8BB2217D-0F2D-451D-9A11-F04C0973C488} = {8BB2217D-0F2D-451D-9A11-F04C0973C486}
+		{8BB2217D-0F2D-451D-9A11-F04C0973C489} = {8BB2217D-0F2D-451D-9A11-F04C0973C486}
+		{8BB2217D-0F2D-451D-9A11-F04C0973C490} = {8BB2217D-0F2D-451D-9A11-F04C0973C486}
+		{8BB2217D-0F2D-451D-9A11-F04C0973C491} = {8BB2217D-0F2D-451D-9A11-F04C0973C486}
+		{8BB2217D-0F2D-451D-9A11-F04C0973C492} = {8BB2217D-0F2D-451D-9A11-F04C0973C487}
+		{8BB2217D-0F2D-451D-9A11-F04C0973C493} = {8BB2217D-0F2D-451D-9A11-F04C0973C487}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8BB2217D-0F2D-451D-9A11-F04C0973C499}
+	EndGlobalSection
+EndGlobal
