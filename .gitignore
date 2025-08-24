@@ -75,3 +75,14 @@ logs/
 
 # Coverage reports
 coverage/
+
+# Publish and Distribution
+publish/
+dist/
+*.zip
+*.tar.gz
+*.exe
+*.dmg
+*.pkg
+*.deb
+*.rpm

@@ -1,6 +1,7 @@
+using System;
+using System.Windows;
 using ArmorVehicleDamageAssessment.UI.ViewModels;
 using Microsoft.Extensions.Logging;
-using System.Windows;
 
 namespace ArmorVehicleDamageAssessment.UI.Views;
 

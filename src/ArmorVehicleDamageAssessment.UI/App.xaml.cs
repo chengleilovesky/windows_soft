@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using System.Windows;
+using ArmorVehicleDamageAssessment.Common.Interfaces;
 using ArmorVehicleDamageAssessment.Core.Interfaces;
 using ArmorVehicleDamageAssessment.Core.Services;
 using ArmorVehicleDamageAssessment.Data.Context;
@@ -10,8 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
-using System.IO;
-using System.Windows;
 
 namespace ArmorVehicleDamageAssessment.UI;
 

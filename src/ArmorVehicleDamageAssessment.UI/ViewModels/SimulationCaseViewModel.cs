@@ -1,10 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using ArmorVehicleDamageAssessment.Common.Helpers;
+using ArmorVehicleDamageAssessment.Common.Models;
 using ArmorVehicleDamageAssessment.Core.Interfaces;
 using ArmorVehicleDamageAssessment.Core.Models;
-using ArmorVehicleDamageAssessment.Common.Helpers;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
-using System.Windows;
 
 namespace ArmorVehicleDamageAssessment.UI.ViewModels;
 
@@ -328,7 +334,7 @@ public partial class SimulationCaseViewModel : ViewModelBase
         if (caseDto == null) return;
 
         var result = MessageBox.Show(
-            $"确定要删除算例"{caseDto.Name}"吗？\n删除后将无法恢复。",
+            $"确定要删除算例\"{caseDto.Name}\"吗？\n删除后将无法恢复。",
             "确认删除",
             MessageBoxButton.YesNo,
             MessageBoxImage.Warning);
