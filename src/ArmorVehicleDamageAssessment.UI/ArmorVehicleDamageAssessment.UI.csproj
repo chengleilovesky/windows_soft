@@ -22,6 +22,16 @@
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.5" />
   </ItemGroup>
 
+  <!-- 确保配置文件被复制到输出目录 -->
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ArmorVehicleDamageAssessment.Core\ArmorVehicleDamageAssessment.Core.csproj" />
     <ProjectReference Include="..\ArmorVehicleDamageAssessment.Data\ArmorVehicleDamageAssessment.Data.csproj" />

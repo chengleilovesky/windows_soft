@@ -26,24 +26,57 @@ public partial class App : Application
     {
         try
         {
+            // 创建日志目录
+            var logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+            if (!Directory.Exists(logDir))
+            {
+                Directory.CreateDirectory(logDir);
+            }
+
+            // 记录启动日志
+            var startupLog = Path.Combine(logDir, "startup.log");
+            File.AppendAllText(startupLog, $"{DateTime.Now}: 应用程序开始启动\n");
+
             // 构建Host
             _host = CreateHostBuilder().Build();
+            File.AppendAllText(startupLog, $"{DateTime.Now}: Host创建成功\n");
 
             // 确保数据库创建
             await EnsureDatabaseCreatedAsync();
+            File.AppendAllText(startupLog, $"{DateTime.Now}: 数据库初始化成功\n");
 
             // 启动Host
             await _host.StartAsync();
+            File.AppendAllText(startupLog, $"{DateTime.Now}: Host启动成功\n");
 
             // 显示主窗口
             var mainWindow = _host.Services.GetRequiredService<MainWindow>();
             mainWindow.Show();
+            File.AppendAllText(startupLog, $"{DateTime.Now}: 主窗口显示成功\n");
 
             base.OnStartup(e);
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"应用程序启动失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            // 详细的错误日志
+            var logDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
+            if (!Directory.Exists(logDir))
+            {
+                Directory.CreateDirectory(logDir);
+            }
+            
+            var errorLog = Path.Combine(logDir, "error.log");
+            var errorDetails = $"{DateTime.Now}: 启动失败\n" +
+                              $"错误消息: {ex.Message}\n" +
+                              $"堆栈跟踪: {ex.StackTrace}\n" +
+                              $"内部异常: {ex.InnerException?.ToString() ?? "无"}\n" +
+                              $"=====================================\n";
+            
+            File.AppendAllText(errorLog, errorDetails);
+
+            MessageBox.Show($"应用程序启动失败：\n{ex.Message}\n\n详细信息请查看：{errorLog}", 
+                "启动错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            
             Shutdown(1);
         }
     }
