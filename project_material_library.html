@@ -1,0 +1,3063 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目材料库 - 装甲车辆抗毁伤数字化评估软件</title>
+    <style>
+        /* CSS 变量定义 - 从 MasterGo DSL 提取的设计令牌 */
+        :root {
+            /* 颜色变量 - 附带DSL引用注释 */
+            --bg-primary: #E7EDF1;          /* paint_1:1709 - 主背景色 */
+            --bg-white: #FFFFFF;            /* paint_1:1725 - 白色背景 */
+            --text-primary: #17181A;        /* paint_1:1722 - 主文本色 */
+            --text-secondary: #525A66;      /* paint_1:1859 - 辅助文本色 */
+            --text-muted: #333333;          /* paint_1:1769 - 弱化文本 */
+            --accent-blue: #415AD9;         /* paint_1:1736 - 强调蓝色 */
+            --border-light: #DFE5EB;        /* paint_1:1787 - 边框色 */
+            --text-gray: #969799;           /* paint_1:3293 - 灰色文字 */
+            --divider-gray: rgba(151, 151, 153, 0.3); /* 灰色半透明分割线 */
+            
+            /* 字体变量 - 附带DSL引用注释 */
+            --font-family-primary: 'Source Han Sans', 'PingFangSC-Regular', 'Microsoft YaHei UI', Arial, sans-serif;
+            --font-family-header: 'SourceHanSansCN-Revision', sans-serif; /* font_1:1809 */
+            --font-body: 'PingFang SC', sans-serif; /* font_1:3292 */
+            
+            /* 尺寸变量 */
+            --font-size-title: 20px;        /* font_1:1809 */
+            --font-size-subtitle: 16px;     /* font_1:1752 */
+            --font-size-body: 14px;         /* font_1:3292 */
+            --line-height-title: 20px;
+            --line-height-subtitle: 16px;
+            --line-height-body: 22px;       /* font_1:3292 */
+            
+            /* 布局变量 */
+            --sidebar-width: 260px;
+            --header-height: 80px;
+            --divider-width: 1px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* =============================================================================
+           整体容器布局
+           ============================================================================= */
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* =============================================================================
+           左侧导航栏 - 固定宽度
+           ============================================================================= */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            opacity: 0.7;
+            font-size: var(--font-size-title);
+            line-height: var(--line-height-title);
+            transition: opacity 0.2s ease;
+        }
+
+        .back-button:hover {
+            opacity: 1;
+        }
+
+        .back-icon {
+            width: 8px;
+            height: 16px;
+            color: var(--text-primary);
+        }
+
+        .sidebar-nav {
+            padding: 24px 0;
+        }
+
+        .nav-item {
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: var(--font-size-subtitle);
+            line-height: var(--line-height-subtitle);
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .nav-item:hover {
+            background-color: #F8F9FA;
+        }
+
+        .nav-item.active {
+            color: var(--accent-blue);
+            background-color: rgba(65, 90, 217, 0.08);
+        }
+
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
+        /* =============================================================================
+           主内容区域
+           ============================================================================= */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 顶部导航栏 */
+        .header-nav {
+            height: var(--header-height);
+            background-color: var(--bg-white);
+            display: flex;
+            align-items: center;
+            padding: 0 32px;
+            gap: 40px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-tab {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 0;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-size: var(--font-size-subtitle);
+            line-height: var(--line-height-subtitle);
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tab:hover {
+            color: var(--accent-blue);
+        }
+
+        .nav-tab.active {
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .nav-tab-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* =============================================================================
+           展示区域 - 左右3:7布局
+           ============================================================================= */
+        .content-area {
+            flex: 1;
+            display: flex;
+            height: calc(100vh - var(--header-height));
+            overflow: hidden;
+        }
+
+        /* 左侧材料列表区域 (30%) */
+        .material-list-section {
+            width: 30%;
+            background-color: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            border-right: var(--divider-width) solid var(--divider-gray);
+            height: 100%;
+        }
+
+        .material-list-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .material-list-title {
+            font-family: var(--font-family-header);
+            font-size: var(--font-size-title);
+            line-height: var(--line-height-title);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .add-material-btn {
+            width: 40px;
+            height: 40px;
+            background-color: var(--accent-blue);
+            border: none;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            color: var(--bg-white);
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .add-material-btn:hover {
+            background-color: #3348C5;
+        }
+
+        .add-material-btn:active {
+            transform: translateY(1px);
+        }
+
+        .material-list-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            color: var(--text-gray);
+            text-align: center;
+            flex: 1;
+            padding: 24px;
+        }
+
+        .empty-state-icon {
+            width: 120px;
+            height: 80px;
+            opacity: 0.4;
+            background: linear-gradient(180deg, #E5E9EF 1%, rgba(255, 255, 255, 0) 50%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .empty-state-text {
+            font-family: var(--font-body);
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-body);
+            color: var(--text-gray);
+        }
+
+        /* 右侧详情展示区域 (70%) */
+        .material-details-section {
+            width: 70%;
+            background-color: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 16px 20px;
+        }
+
+        .details-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-gray);
+            text-align: center;
+        }
+
+        .details-empty-icon {
+            width: 120px;
+            height: 80px;
+            opacity: 0.4;
+            background: linear-gradient(180deg, #E5E9EF 1%, rgba(255, 255, 255, 0) 50%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto;
+            flex-shrink: 0;
+        }
+
+        .details-empty-title {
+            font-family: var(--font-body);
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-body);
+            color: var(--text-gray);
+            font-weight: normal;
+        }
+
+        .details-empty-subtitle {
+            font-family: var(--font-body);
+            font-size: var(--font-size-body);
+            line-height: var(--line-height-body);
+            color: var(--text-gray);
+            max-width: 300px;
+        }
+
+        /* =============================================================================
+           响应式设计
+           ============================================================================= */
+        @media (max-width: 1024px) {
+            .content-area {
+                flex-direction: column;
+            }
+            
+            .material-list-section {
+                width: 100%;
+                height: 40%;
+                border-right: none;
+                border-bottom: var(--divider-width) solid var(--divider-gray);
+            }
+            
+            .material-details-section {
+                width: 100%;
+                height: 60%;
+            }
+            
+            .params-display-area {
+                gap: 16px;
+                height: auto;
+                min-height: 400px;
+            }
+            
+            .param-name-col {
+                width: 80px;
+                min-width: 80px;
+            }
+            
+            .param-value-col {
+                width: 80px;
+                min-width: 80px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: auto;
+                order: 2;
+            }
+            
+            .main-content {
+                order: 1;
+            }
+            
+            .header-nav {
+                padding: 0 16px;
+                gap: 20px;
+            }
+            
+            .nav-tabs {
+                gap: 16px;
+                overflow-x: auto;
+            }
+        }
+
+        /* =============================================================================
+           材料选择弹出框
+           ============================================================================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* paint_1:2074 */
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            width: 795px;
+            height: 480px;
+            background-color: var(--bg-white);
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1) translateY(0);
+        }
+
+        /* 弹出框头部 */
+        .modal-header {
+            height: 56px;
+            background-color: var(--bg-primary); /* paint_1:1709 */
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px 0 24px;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-family: var(--font-family-header);
+            font-size: 22px;
+            line-height: 28px;
+            color: var(--text-primary);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title::before {
+            content: "📋";
+            font-size: 24px;
+        }
+
+        .modal-close-btn {
+            width: 28px;
+            height: 28px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary); /* paint_1:2125 */
+            transition: all 0.2s ease;
+        }
+
+        .modal-close-btn:hover {
+            color: var(--text-primary);
+            background-color: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }
+
+        .modal-close-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* 弹出框内容区域 */
+        .modal-content {
+            flex: 1;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        /* 新增材料按钮 */
+        .add-material-modal-btn {
+            width: 112px;
+            height: 36px;
+            background-color: var(--accent-blue);
+            border: none;
+            border-radius: 6px;
+            color: var(--bg-white);
+            font-family: var(--font-family-primary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .add-material-modal-btn:hover {
+            background-color: rgba(65, 90, 217, 0.9);
+            transform: translateY(-1px);
+        }
+
+        .add-material-modal-btn::before {
+            content: "+";
+            font-size: 14px;
+            font-weight: 300;
+        }
+
+        /* 材料列表表格 */
+        .material-table {
+            flex: 1;
+            border: 1px solid var(--border-light); /* paint_1:1787 */
+            border-radius: 0;
+            overflow: hidden;
+        }
+
+        .material-table table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-family-primary);
+        }
+
+        /* 表头样式 */
+        .material-table thead {
+            background-color: var(--bg-primary); /* paint_1:1709 */
+        }
+
+        .material-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 500; /* font_1:1733 */
+            color: var(--text-primary);
+            border: none;
+        }
+
+        .material-table th:first-child {
+            width: 60px;
+            text-align: center;
+        }
+
+        .material-table th:nth-child(2) { width: 100px; }
+        .material-table th:nth-child(3) { width: 120px; }
+        .material-table th:nth-child(4) { width: 150px; }
+        .material-table th:nth-child(5) { width: 150px; }
+        .material-table th:nth-child(6) { width: 80px; text-align: center; }
+
+        /* 表格行样式 */
+        .material-table tbody tr {
+            border-bottom: 1px solid var(--border-light);
+            transition: background-color 0.2s ease;
+        }
+
+        .material-table tbody tr:nth-child(even) {
+            background-color: #F7F8FB; /* paint_1:2081 */
+        }
+
+        .material-table tbody tr:hover {
+            background-color: rgba(65, 90, 217, 0.04);
+        }
+
+        .material-table td {
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        .material-table td:first-child {
+            text-align: center;
+        }
+
+        .material-table td:last-child {
+            text-align: center;
+        }
+
+        /* 复选框样式 */
+        .material-checkbox {
+            width: 14px;
+            height: 14px;
+            border: 1px solid var(--border-light); /* paint_1:1787 */
+            border-radius: 2px;
+            background-color: var(--bg-white);
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+        }
+
+        .material-checkbox.checked {
+            background-color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+
+        .material-checkbox.checked::after {
+            content: '';
+            position: absolute;
+            left: 2.5px;
+            top: -0.5px;
+            width: 6.5px;
+            height: 4.5px;
+            border: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='7' height='5' viewBox='0 0 7 5' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 3.43934L0.53033 1.96967L-0.53033 3.03033L2 5.56066L7.03033 0.53033L5.96967 -0.53033L2 3.43934Z' fill='white'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        /* 操作按钮 */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-btn {
+            width: 22px;
+            height: 22px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            transition: color 0.2s ease;
+        }
+
+        .action-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .action-btn svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 弹出框底部按钮 */
+        .modal-footer {
+            padding: 16px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-top: 1px solid var(--border-light);
+            background-color: var(--bg-white);
+            flex-shrink: 0;
+        }
+
+        .modal-btn {
+            width: 80px;
+            height: 36px;
+            border-radius: 6px;
+            font-family: var(--font-family-primary);
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-btn-cancel {
+            background-color: var(--bg-white);
+            color: var(--text-primary);
+            border: 1px solid var(--border-light);
+        }
+
+        .modal-btn-cancel:hover {
+            background-color: #F8F9FA;
+        }
+
+        .modal-btn-save {
+            background-color: var(--accent-blue);
+            color: var(--bg-white);
+        }
+
+        .modal-btn-save:hover {
+            background-color: #3348C5;
+        }
+
+        /* =============================================================================
+           新增材料弹出框样式
+           ============================================================================= */
+        .add-material-modal-container {
+            width: 920px; /* DSL: 920px width */
+            height: 640px; /* DSL: 640px height */
+            background-color: var(--bg-white); /* paint_1:1725 */
+            border-radius: 16px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .modal-overlay.active .add-material-modal-container {
+            transform: scale(1) translateY(0);
+        }
+
+        /* 新增材料弹出框内容区 */
+        .add-material-modal-content {
+            flex: 1;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+        }
+
+        /* 基本信息行 */
+        .material-basic-info {
+            display: flex;
+            gap: 24px;
+        }
+
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            font-weight: 500;
+            color: var(--text-secondary); /* paint_1:1859 */
+        }
+
+        .form-input {
+            height: 48px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-light); /* paint_1:1843 */
+            border-radius: 8px;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            background-color: var(--bg-white); /* paint_1:1725 */
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(65, 90, 217, 0.1);
+        }
+
+        /* 参数配置区域 */
+        .material-params-area {
+            display: flex;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .param-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 13px;
+        }
+
+        /* 参数段头部 */
+        .param-section-header {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-label {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-secondary); /* paint_1:1859 */
+            font-weight: normal;
+        }
+
+        .param-select {
+            height: 48px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-light); /* paint_1:1843 */
+            border-radius: 8px;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            background-color: var(--bg-white); /* paint_1:1725 */
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23525A66' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+
+        .param-select:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(65, 90, 217, 0.1);
+        }
+
+        /* 参数网格 */
+        .param-grid {
+            display: flex;
+            flex: 1;
+            gap: 0;
+        }
+
+        .param-labels,
+        .param-units,
+        .param-values {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .param-labels {
+            width: 140px; /* DSL: 140px width */
+        }
+
+        .param-units {
+            width: 140px; /* DSL: 140px width */
+        }
+
+        .param-values {
+            width: 140px; /* DSL: 140px width */
+        }
+
+        /* 参数网格头部 */
+        .param-label-header,
+        .param-unit-header,
+        .param-value-header {
+            height: 52px; /* DSL: 52px height */
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            background-color: var(--bg-white); /* paint_1:1725 */
+            border: 1px solid var(--border-light); /* paint_1:1843 */
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            font-weight: 500; /* font_1:1733 */
+            color: var(--text-primary);
+        }
+
+        .param-label-header {
+            border-radius: 8px 0 0 0;
+        }
+
+        .param-value-header {
+            border-radius: 0 8px 0 0;
+        }
+
+        /* 参数行 */
+        .param-label,
+        .param-unit {
+            height: 52px; /* DSL: 52px height */
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            background-color: #F2F5F7; /* paint_1:1841 */
+            border: 1px solid var(--border-light); /* paint_1:1843 */
+            border-top: none;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-primary);
+        }
+
+        .param-input {
+            height: 52px; /* DSL: 52px height */
+            padding: 0 16px;
+            border: 1px solid var(--border-light); /* paint_1:1843 */
+            border-top: none;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            background-color: var(--bg-white); /* paint_1:1725 */
+            transition: border-color 0.2s ease;
+        }
+
+        .param-input:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+            box-shadow: inset 0 0 0 1px var(--accent-blue);
+        }
+
+        /* 最后一行的圆角处理 */
+        .param-labels .param-label:last-child {
+            border-radius: 0 0 0 8px;
+        }
+
+        .param-values .param-input:last-child {
+            border-radius: 0 0 8px 0;
+        }
+
+        /* =============================================================================
+           材料列表样式
+           ============================================================================= */
+        .material-list {
+            flex: 1;
+            padding: 0;
+            overflow-y: auto;
+            height: 100%;
+        }
+        
+        .material-list-item {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-light);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .material-list-item:hover {
+            background-color: #F8F9FA;
+        }
+        
+        .material-list-item.active {
+            background-color: rgba(65, 90, 217, 0.08);
+            border-left: 3px solid var(--accent-blue);
+        }
+        
+        .material-item-info {
+            flex: 1;
+        }
+        
+        .material-item-name {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-subtitle);
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .material-item-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .material-list-item:hover .material-item-actions {
+            opacity: 1;
+        }
+        
+        .material-action-btn {
+            width: 20px;
+            height: 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px;
+            border-radius: 4px;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .material-action-btn:hover {
+            background-color: rgba(255, 77, 79, 0.1);
+            color: #ff4d4f;
+        }
+        
+        .material-action-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* =============================================================================
+           材料详情展示样式
+           ============================================================================= */
+        .material-details-content {
+            flex: 1;
+            padding: 12px 16px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+            width: 100%;
+        }
+        
+        /* 材料头部样式已移除 */
+        
+        .params-display-area {
+            display: flex;
+            gap: 16px;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            padding: 0 4px;
+        }
+        
+        .param-display-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background-color: transparent;
+            border: none;
+            border-radius: 0;
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .param-display-header {
+            padding: 8px 0;
+            background-color: transparent;
+            border-bottom: none;
+            margin-bottom: 8px;
+            flex-shrink: 0;
+        }
+        
+        .section-title {
+            font-family: var(--font-family-header);
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+        
+        .equation-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .equation-label {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-secondary);
+        }
+        
+        .equation-select {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-primary);
+            background-color: var(--bg-white);
+            padding: 8px 12px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            margin-top: 4px;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23525A66' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 8px center;
+            padding-right: 32px;
+        }
+        
+        .equation-select:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(65, 90, 217, 0.1);
+        }
+        
+        .param-display-table {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--bg-white);
+            min-height: 0;
+        }
+        
+        .param-table-header {
+            display: flex;
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-light);
+            flex-shrink: 0;
+        }
+        
+        .param-col {
+            padding: 10px 12px;
+            font-family: var(--font-family-primary);
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-primary);
+            border-right: 1px solid var(--border-light);
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .param-col:last-child {
+            border-right: none;
+        }
+        
+        .param-name-col {
+            width: 80px;
+            min-width: 80px;
+            max-width: 80px;
+            text-align: left;
+            justify-content: flex-start;
+            flex-shrink: 0;
+        }
+        
+        .param-unit-col {
+            width: 140px;
+            min-width: 140px;
+            max-width: 140px;
+            flex-shrink: 0;
+        }
+        
+        .param-value-col {
+            width: 80px;
+            min-width: 80px;
+            max-width: 80px;
+            flex-shrink: 0;
+        }
+        
+        .param-table-body {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 200px;
+            max-height: calc(100vh - 300px);
+        }
+        
+        .param-row {
+            display: flex;
+            border-bottom: 1px solid var(--border-light);
+            min-height: 36px;
+            align-items: stretch;
+        }
+        
+        .param-row:nth-child(even) {
+            background-color: #F7F8FB;
+        }
+        
+        .param-cell {
+            padding: 8px 12px;
+            font-family: var(--font-family-primary);
+            font-size: 12px;
+            color: var(--text-primary);
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 36px;
+            white-space: nowrap;
+        }
+        
+        .param-cell:last-child {
+            border-right: none;
+        }
+        
+        .param-cell.param-name {
+            background-color: #F2F5F7;
+            font-weight: 500;
+            justify-content: flex-start;
+            padding-left: 12px;
+            width: 80px;
+            max-width: 80px;
+            flex-shrink: 0;
+        }
+        
+        .param-cell.param-unit {
+            background-color: #F2F5F7;
+            width: 140px;
+            max-width: 140px;
+            flex-shrink: 0;
+        }
+        
+        .param-cell.param-value {
+            font-weight: 500;
+            font-family: 'Courier New', monospace;
+            width: 80px;
+            max-width: 80px;
+            flex-shrink: 0;
+        }
+        
+        /* =============================================================================
+           目标建模页面样式
+           ============================================================================= */
+        .target-modeling-section {
+            width: 30%;
+            background-color: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            border-right: var(--divider-width) solid var(--divider-gray);
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .target-modeling-header {
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .target-modeling-title {
+            font-family: var(--font-family-header);
+            font-size: var(--font-size-title);
+            line-height: var(--line-height-title);
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* 水平按钮组容器 */
+        .horizontal-buttons-container {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: nowrap;
+        }
+
+        /* 统一的小按钮样式 */
+        .small-btn {
+            height: 28px;
+            padding: 4px 10px;
+            border: 1px solid #E5E8EB;
+            border-radius: 5px;
+            font-family: var(--font-family-primary);
+            font-size: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: var(--bg-white);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .small-btn:hover {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            background-color: rgba(25, 118, 210, 0.04);
+        }
+
+        .small-btn.active {
+            border-color: var(--accent-blue);
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .small-btn.primary {
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .small-btn.primary:hover {
+            background-color: var(--accent-blue);
+            color: white;
+        }
+
+        .small-btn .btn-icon {
+            width: 10px;
+            height: 10px;
+            margin-right: 3px;
+        }
+
+        /* 参考图区域 */
+        .reference-image-section {
+            margin-bottom: 20px;
+        }
+
+        .section-label {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .reference-image-container {
+            width: 100%;
+            max-width: 350px;
+            height: 160px;
+            background: linear-gradient(180deg, #F4F7FF 0%, #D9E5FF 100%); /* paint_1:1964 */
+            border: 1px solid #DFE5EB; /* paint_1:1966 */
+            border-radius: 8px;
+            box-shadow: 0px 8px 12px 0px rgba(134, 163, 191, 0.1); /* effect_1:1968 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .reference-image {
+            width: 80%;
+            height: 75%;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 187"><rect width="330" height="187" fill="%23E0E7ED"/><path d="M50 50h230v87H50z" fill="%23BCC7D3"/><path d="M80 80h170v27H80z" fill="%23A3B1C0"/></svg>');
+            background-size: cover;
+            background-position: center;
+            border-radius: 4px;
+            box-shadow: -4px 4px 12px 0px rgba(18, 37, 134, 0.2); /* effect_1:1838 */
+        }
+
+        /* 靶板参数标题 */
+        .target-params-title {
+            font-family: var(--font-family-header);
+            font-size: var(--font-size-title);
+            line-height: var(--line-height-title);
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        /* 参数输入区域 */
+        .param-inputs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .param-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .param-input-label {
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-secondary);
+        }
+
+        .param-input-field {
+            height: 48px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            background-color: var(--bg-white);
+            color: var(--text-primary);
+            transition: border-color 0.2s ease;
+        }
+
+        .param-input-field:focus {
+            border-color: var(--accent-blue);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(65, 90, 217, 0.1);
+        }
+
+        .param-input-field-readonly {
+            background-color: #F2F5F7;
+            cursor: not-allowed;
+        }
+
+        .param-input-unit {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            opacity: 0.4;
+            font-size: var(--font-size-body);
+            pointer-events: none;
+        }
+
+        .param-input-wrapper {
+            position: relative;
+        }
+
+        /* 靶板参数表格 */
+        .target-board-table {
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--bg-white);
+            margin-bottom: 24px;
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .target-board-table-header {
+            display: grid;
+            grid-template-columns: 60px 120px 140px 120px;
+            background-color: #F2F5F7; /* paint_1:1841 */
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .target-board-table-header-cell {
+            padding: 16px 12px;
+            font-family: var(--font-family-primary);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+            border-right: 1px solid var(--border-light);
+        }
+
+        .target-board-table-header-cell:last-child {
+            border-right: none;
+        }
+
+        .target-board-table-row {
+            display: grid;
+            grid-template-columns: 60px 120px 140px 120px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .target-board-table-row:last-child {
+            border-bottom: none;
+        }
+
+        .target-board-table-cell {
+            padding: 12px 8px;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-primary);
+            text-align: center;
+            border-right: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 48px;
+        }
+
+        .target-board-table-cell:last-child {
+            border-right: none;
+        }
+
+        .target-board-table-cell.number-cell {
+            background-color: #F2F5F7;
+            font-weight: 500;
+        }
+
+        .target-board-table-cell input {
+            width: 80%;
+            max-width: 80px;
+            border: 1px solid transparent;
+            background: transparent;
+            text-align: center;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-primary);
+            padding: 4px;
+            border-radius: 3px;
+        }
+
+        .target-board-table-cell input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background-color: var(--bg-white);
+        }
+
+        .target-board-table-cell select {
+            width: 90%;
+            border: 1px solid transparent;
+            background: transparent;
+            text-align: center;
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            color: var(--text-primary);
+            cursor: pointer;
+            appearance: none;
+            padding: 4px;
+            border-radius: 3px;
+        }
+
+        .target-board-table-cell select:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            background-color: var(--bg-white);
+        }
+
+        .material-select-placeholder {
+            color: var(--text-secondary);
+            opacity: 0.4;
+        }
+
+        /* 底部操作按钮 */
+        .target-modeling-actions {
+            display: flex;
+            gap: 12px;
+            padding: 16px 24px 24px;
+            flex-shrink: 0;
+            border-top: 1px solid var(--border-light);
+            background-color: var(--bg-white);
+        }
+
+        .action-btn-primary {
+            width: 132px;
+            height: 48px;
+            background-color: var(--accent-blue);
+            border: none;
+            border-radius: 8px;
+            color: var(--bg-white);
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn-primary:hover {
+            background-color: #3348C5;
+        }
+
+        .action-btn-secondary {
+            width: 126px;
+            height: 48px;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: var(--font-family-primary);
+            font-size: var(--font-size-body);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn-secondary:hover {
+            background-color: #F8F9FA;
+        }
+
+        /* 三维视图区域 */
+        .threejs-view-section {
+            width: 70%;
+            background-color: var(--bg-white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 16px 20px;
+        }
+
+        .threejs-view-container {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-family: var(--font-family-primary);
+            font-size: 18px;
+            border: 1px solid var(--border-light);
+        }
+
+        /* 隐藏/显示页面 */
+        .page-content {
+            display: none;
+        }
+
+        .page-content.active {
+            display: flex;
+        }
+
+        /* =============================================================================
+           可访问性增强
+           ============================================================================= */
+        .add-material-btn:focus,
+        .nav-item:focus,
+        .nav-tab:focus,
+        .modal-close-btn:focus,
+        .add-material-modal-btn:focus,
+        .modal-btn:focus,
+        .action-btn:focus,
+        .form-input:focus,
+        .param-input:focus,
+        .param-select:focus {
+            outline: 2px solid var(--accent-blue);
+            outline-offset: 2px;
+        }
+
+        /* 跳过链接 */
+        .skip-to-content {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: var(--bg-white);
+            padding: 8px;
+            text-decoration: none;
+            color: var(--text-primary);
+            border-radius: 4px;
+            border: 1px solid var(--border-light);
+            z-index: 1000;
+        }
+
+        .skip-to-content:focus {
+            top: 6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 跳过链接 - 提升可访问性 -->
+    <a href="#main-content" class="skip-to-content">跳转到主要内容</a>
+
+    <div class="container">
+        <!-- =============================================================================
+             左侧导航栏
+             ============================================================================= -->
+        <aside class="sidebar" role="navigation" aria-label="主导航">
+            <div class="sidebar-header">
+                <a href="#" class="back-button" aria-label="返回首页">
+                    <svg class="back-icon" viewBox="0 0 8 16" fill="currentColor">
+                        <path d="M8.53033 0.53033Q8.63582 0.424841 8.69291 0.287013Q8.75 0.149184 8.75 0Q8.75 -0.0738685 8.73559 -0.146318Q8.72118 -0.218767 8.69291 -0.287013Q8.66464 -0.355258 8.6236 -0.416678Q8.58256 -0.478097 8.53033 -0.53033Q8.4781 -0.582563 8.41668 -0.623602Q8.35526 -0.664641 8.28701 -0.69291Q8.21877 -0.721178 8.14632 -0.735589Q8.07387 -0.75 8 -0.75Q7.85082 -0.75 7.71299 -0.69291Q7.57516 -0.635819 7.46967 -0.53033L-0.53033 7.46967Q-0.635819 7.57516 -0.69291 7.71299Q-0.75 7.85082 -0.75 8Q-0.75 8.14918 -0.69291 8.28701Q-0.635819 8.42484 -0.53033 8.53033L7.46967 16.5303Q7.57516 16.6358 7.71299 16.6929Q7.85082 16.75 8 16.75Q8.07387 16.75 8.14632 16.7356Q8.21877 16.7212 8.28701 16.6929Q8.35526 16.6646 8.41668 16.6236Q8.4781 16.5826 8.53033 16.5303Q8.58256 16.4781 8.6236 16.4167Q8.66464 16.3553 8.69291 16.287Q8.72118 16.2188 8.73559 16.1463Q8.75 16.0739 8.75 16Q8.75 15.8508 8.69291 15.713Q8.63582 15.5752 8.53033 15.4697L8.52969 15.469L1.06066 8L8.52987 0.530792L8.53033 0.53033L8.53033 0.53033Z"/>
+                    </svg>
+                    首页
+                </a>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">📋</div>
+                    项目信息
+                </a>
+                <a href="#" class="nav-item active">
+                    <div class="nav-icon">🧊</div>
+                    有限元仿真模型
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">⚙️</div>
+                    仿真计算
+                </a>
+                <a href="#" class="nav-item">
+                    <div class="nav-icon">📊</div>
+                    计算结果分析
+                </a>
+            </nav>
+        </aside>
+
+        <!-- =============================================================================
+             主内容区域
+             ============================================================================= -->
+        <main class="main-content" id="main-content" role="main">
+            <!-- 顶部导航栏 -->
+            <header class="header-nav" role="banner">
+                <nav class="nav-tabs" role="tablist" aria-label="功能导航">
+                    <a href="#" class="nav-tab active" role="tab" aria-selected="true" data-page="material-model">
+                        <div class="nav-tab-icon">🧱</div>
+                        材料模型
+                    </a>
+                    <a href="#" class="nav-tab" role="tab" aria-selected="false" data-page="target-modeling">
+                        <div class="nav-tab-icon">🎯</div>
+                        目标建模
+                    </a>
+                    <a href="#" class="nav-tab" role="tab" aria-selected="false" data-page="warhead-modeling">
+                        <div class="nav-tab-icon">💥</div>
+                        穿甲战斗部建模
+                    </a>
+                    <a href="#" class="nav-tab" role="tab" aria-selected="false" data-page="simulation-params">
+                        <div class="nav-tab-icon">⚙️</div>
+                        仿真控制参数
+                    </a>
+                </nav>
+            </header>
+
+            <!-- =============================================================================
+                 展示区域 - 左右3:7布局
+                 ============================================================================= -->
+            <!-- 材料模型页面 -->
+            <div class="content-area page-content active" id="material-model-page">
+                <!-- 左侧材料列表区域 (30%) -->
+                <section class="material-list-section" aria-label="材料列表">
+                    <div class="material-list-header">
+                        <h2 class="material-list-title">项目材料库</h2>
+                        <button class="add-material-btn" 
+                                aria-label="添加材料" 
+                                title="添加新材料">
+                            +
+                        </button>
+                    </div>
+                    
+                    <div class="material-list-content" id="materialListContent">
+                        <div class="empty-state" id="emptyState">
+                            <div class="empty-state-icon">
+                                📁
+                            </div>
+                            <p class="empty-state-text">暂无材料，请添加材料</p>
+                        </div>
+                        <div class="material-list" id="materialList" style="display: none;">
+                            <!-- 材料列表项将在这里动态生成 -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 右侧详情展示区域 (70%) -->
+                <section class="material-details-section" aria-label="材料详情">
+                    <div class="details-empty-state" id="detailsEmptyState">
+                        <div class="details-empty-icon">
+                            📁
+                        </div>
+                        <h3 class="details-empty-title">请选择一个材料</h3>
+                        <p class="details-empty-subtitle">在左侧列表中选择材料以查看详细信息，或点击"+"按钮添加新材料</p>
+                    </div>
+                    
+                    <!-- 材料详情展示区域 -->
+                    <div class="material-details-content" id="materialDetailsContent" style="display: none;">
+                        <!-- 材料基本信息已移除 -->
+                        
+                        <!-- 参数展示区域 -->
+                        <div class="params-display-area">
+                            <!-- 左侧：本构方程属性 -->
+                            <div class="param-display-section">
+                                <div class="param-display-header">
+                                    <h3 class="section-title">本构方程属性</h3>
+                                    <div class="equation-info">
+                                        <span class="equation-label">本构方程选择</span>
+                                        <select class="equation-select" id="constitutiveEquation">
+                                            <option value="PLASTIC_KINEMATIC">PLASTIC_KINEMATIC</option>
+                                            <option value="JOHNSON_COOK">JOHNSON_COOK</option>
+                                            <option value="GRUNEISEN">GRUNEISEN</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="param-display-table">
+                                    <div class="param-table-header">
+                                        <div class="param-col param-name-col">参数名称</div>
+                                        <div class="param-col param-unit-col">单位制 (cm/g/μs)</div>
+                                        <div class="param-col param-value-col">值</div>
+                                    </div>
+                                    <div class="param-table-body" id="constitutiveParams">
+                                        <!-- 参数行将在这里动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 右侧：状态方程属性 -->
+                            <div class="param-display-section">
+                                <div class="param-display-header">
+                                    <h3 class="section-title">状态方程属性</h3>
+                                    <div class="equation-info">
+                                        <span class="equation-label">状态方程选择</span>
+                                        <select class="equation-select" id="stateEquation">
+                                            <option value="PLASTIC_KINEMATIC">PLASTIC_KINEMATIC</option>
+                                            <option value="JOHNSON_COOK">JOHNSON_COOK</option>
+                                            <option value="GRUNEISEN">GRUNEISEN</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="param-display-table">
+                                    <div class="param-table-header">
+                                        <div class="param-col param-name-col">参数名称</div>
+                                        <div class="param-col param-unit-col">单位制 (cm/g/μs)</div>
+                                        <div class="param-col param-value-col">值</div>
+                                    </div>
+                                    <div class="param-table-body" id="stateParams">
+                                        <!-- 参数行将在这里动态生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 目标建模页面 -->
+            <div class="content-area page-content" id="target-modeling-page">
+                <!-- 左侧建模参数区域 (30%) -->
+                <section class="target-modeling-section" aria-label="建模参数">
+                    <div class="target-modeling-header">
+                        <h2 class="target-modeling-title">建模参数</h2>
+                    </div>
+                    
+                    <div style="padding: 0 24px; flex: 1; display: flex; flex-direction: column; min-height: 0;">
+                        <!-- 水平对齐的三个按钮 -->
+                        <div class="horizontal-buttons-container">
+                            <button class="small-btn active" data-model-type="equivalent">等效靶模型</button>
+                            <button class="small-btn" data-model-type="vehicle">整车模型</button>
+                            <button class="small-btn primary">
+                                <svg class="btn-icon" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M13.333 1H2.667C1.75 1 1 1.75 1 2.667v10.666C1 14.25 1.75 15 2.667 15h10.666C14.25 15 15 14.25 15 13.333V2.667C15 1.75 14.25 1 13.333 1zM14 13.333c0 .367-.3.667-.667.667H2.667c-.367 0-.667-.3-.667-.667V2.667c0-.367.3-.667.667-.667h10.666c.367 0 .667.3.667.667v10.666z"/>
+                                    <path d="M3 5h10M3 8h4M3 11h4"/>
+                                </svg>
+                                模型库管理
+                            </button>
+                        </div>
+
+                        <!-- 可滚动内容区域 -->
+                        <div style="flex: 1; overflow-y: auto; min-height: 0;">
+                            <!-- 参考图 -->
+                            <div class="reference-image-section" style="flex-shrink: 0;">
+                                <label class="section-label">参考图</label>
+                                <div class="reference-image-container">
+                                    <div class="reference-image"></div>
+                                </div>
+                            </div>
+
+                            <!-- 靶板参数 -->
+                            <div style="flex-shrink: 0; padding-bottom: 20px;">
+                                <h3 class="target-params-title">靶板参数</h3>
+                                
+                                <!-- 参数输入 -->
+                                <div class="param-inputs-grid">
+                                    <div class="param-input-group">
+                                        <label class="param-input-label">靶板层数</label>
+                                        <div class="param-input-wrapper">
+                                            <input type="number" class="param-input-field" value="2" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="param-input-group">
+                                        <label class="param-input-label">网格粒度</label>
+                                        <div class="param-input-wrapper">
+                                            <input type="number" class="param-input-field" value="2" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="param-input-group">
+                                        <label class="param-input-label">靶板长度</label>
+                                        <div class="param-input-wrapper">
+                                            <input type="number" class="param-input-field" value="50">
+                                            <span class="param-input-unit">cm</span>
+                                        </div>
+                                    </div>
+                                    <div class="param-input-group">
+                                        <label class="param-input-label">靶板宽度</label>
+                                        <div class="param-input-wrapper">
+                                            <input type="number" class="param-input-field" value="50">
+                                            <span class="param-input-unit">cm</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 靶板参数表格 -->
+                                <div class="target-board-table">
+                                    <div class="target-board-table-header">
+                                        <div class="target-board-table-header-cell">编号</div>
+                                        <div class="target-board-table-header-cell">靶板厚度</div>
+                                        <div class="target-board-table-header-cell">距前一目标距离</div>
+                                        <div class="target-board-table-header-cell">靶板材料</div>
+                                    </div>
+                                    <div class="target-board-table-row">
+                                        <div class="target-board-table-cell number-cell">1</div>
+                                        <div class="target-board-table-cell">
+                                            <input type="number" value="10">
+                                            <span style="opacity: 0.4; margin-left: 4px;">cm</span>
+                                        </div>
+                                        <div class="target-board-table-cell">
+                                            <input type="number" value="0">
+                                            <span style="opacity: 0.4; margin-left: 4px;">cm</span>
+                                        </div>
+                                        <div class="target-board-table-cell">
+                                            <select>
+                                                <option value="steel">某某材料</option>
+                                                <option value="concrete">混凝土</option>
+                                                <option value="armor">装甲钢</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="target-board-table-row">
+                                        <div class="target-board-table-cell number-cell">2</div>
+                                        <div class="target-board-table-cell">
+                                            <input type="number" value="10">
+                                            <span style="opacity: 0.4; margin-left: 4px;">cm</span>
+                                        </div>
+                                        <div class="target-board-table-cell">
+                                            <input type="number" value="100">
+                                            <span style="opacity: 0.4; margin-left: 4px;">cm</span>
+                                        </div>
+                                        <div class="target-board-table-cell">
+                                            <select>
+                                                <option value="" class="material-select-placeholder">请选择</option>
+                                                <option value="steel">某某材料</option>
+                                                <option value="concrete">混凝土</option>
+                                                <option value="armor">装甲钢</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 底部操作按钮 -->
+                    <div class="target-modeling-actions">
+                        <button class="action-btn-secondary">保存至模型库</button>
+                        <button class="action-btn-primary">生成靶板模型</button>
+                    </div>
+                </section>
+
+                <!-- 右侧三维视图区域 (70%) -->
+                <section class="threejs-view-section" aria-label="三维视图">
+                    <div class="threejs-view-container">
+                        <div style="text-align: center;">
+                            <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                            <div>三维靶板模型视图</div>
+                            <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">
+                                生成靶板模型后将在此处显示三维视图
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- =============================================================================
+         材料选择弹出框
+         ============================================================================= -->
+    <div class="modal-overlay" id="materialModal" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+        <div class="modal-container">
+            <!-- 弹出框头部 -->
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">材料选择</h2>
+                <button class="modal-close-btn" type="button" aria-label="关闭对话框">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 弹出框内容 -->
+            <div class="modal-content">
+                <!-- 新增材料按钮 -->
+                <button class="add-material-modal-btn" type="button">
+                    新增材料
+                </button>
+
+                <!-- 材料列表表格 -->
+                <div class="material-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>材料编号</th>
+                                <th>材料名称</th>
+                                <th>本构方程</th>
+                                <th>状态方程</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="material-checkbox" data-material-id="1"></div>
+                                </td>
+                                <td>1</td>
+                                <td>装甲钢</td>
+                                <td>GRUNEISEN</td>
+                                <td>JOHNSON_COOK</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn" type="button" aria-label="编辑材料" data-material-id="1">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M11.498 1.5l.5-.5a2.121 2.121 0 113 3l-.5.5-3-3zM10.498 2.5l-8 8V13h2.5l8-8-2.5-2.5z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="action-btn delete-btn" type="button" aria-label="删除材料" data-material-id="1">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>
+                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="material-checkbox checked" data-material-id="2"></div>
+                                </td>
+                                <td>2</td>
+                                <td>混凝土</td>
+                                <td>GRUNEISEN</td>
+                                <td>JOHNSON_COOK</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn" type="button" aria-label="编辑材料" data-material-id="2">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M11.498 1.5l.5-.5a2.121 2.121 0 113 3l-.5.5-3-3zM10.498 2.5l-8 8V13h2.5l8-8-2.5-2.5z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="action-btn delete-btn" type="button" aria-label="删除材料" data-material-id="2">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>
+                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="material-checkbox checked" data-material-id="3"></div>
+                                </td>
+                                <td>3</td>
+                                <td>45#钢</td>
+                                <td>GRUNEISEN</td>
+                                <td>JOHNSON_COOK</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn" type="button" aria-label="编辑材料" data-material-id="3">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M11.498 1.5l.5-.5a2.121 2.121 0 113 3l-.5.5-3-3zM10.498 2.5l-8 8V13h2.5l8-8-2.5-2.5z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="action-btn delete-btn" type="button" aria-label="删除材料" data-material-id="3">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>
+                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="material-checkbox" data-material-id="4"></div>
+                                </td>
+                                <td>4</td>
+                                <td>RHA装甲钢</td>
+                                <td>GRUNEISEN</td>
+                                <td>JOHNSON_COOK</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn" type="button" aria-label="编辑材料" data-material-id="4">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M11.498 1.5l.5-.5a2.121 2.121 0 113 3l-.5.5-3-3zM10.498 2.5l-8 8V13h2.5l8-8-2.5-2.5z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="action-btn delete-btn" type="button" aria-label="删除材料" data-material-id="4">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>
+                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="material-checkbox" data-material-id="5"></div>
+                                </td>
+                                <td>5</td>
+                                <td>紫铜1</td>
+                                <td>GRUNEISEN</td>
+                                <td>JOHNSON_COOK</td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <button class="action-btn edit-btn" type="button" aria-label="编辑材料" data-material-id="5">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M11.498 1.5l.5-.5a2.121 2.121 0 113 3l-.5.5-3-3zM10.498 2.5l-8 8V13h2.5l8-8-2.5-2.5z"/>
+                                            </svg>
+                                        </button>
+                                        <button class="action-btn delete-btn" type="button" aria-label="删除材料" data-material-id="5">
+                                            <svg viewBox="0 0 16 16" fill="currentColor">
+                                                <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>
+                                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 弹出框底部按钮 -->
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" type="button">取消</button>
+                <button class="modal-btn modal-btn-save" type="button">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================================================
+         新增材料弹出框
+         ============================================================================= -->
+    <div class="modal-overlay" id="addMaterialModal" role="dialog" aria-labelledby="addModalTitle" aria-modal="true">
+        <div class="add-material-modal-container">
+            <!-- 弹出框头部 -->
+            <div class="modal-header">
+                <h2 class="modal-title" id="addModalTitle">新增材料</h2>
+                <button class="modal-close-btn" type="button" aria-label="关闭对话框">
+                    <svg viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M4.646 4.646a.5.5 0 01.708 0L8 7.293l2.646-2.647a.5.5 0 01.708.708L8.707 8l2.647 2.646a.5.5 0 01-.708.708L8 8.707l-2.646 2.647a.5.5 0 01-.708-.708L7.293 8 4.646 5.354a.5.5 0 010-.708z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- 弹出框内容 -->
+            <div class="add-material-modal-content">
+                <!-- 基本信息行 -->
+                <div class="material-basic-info">
+                    <div class="form-group">
+                        <label for="materialName" class="form-label">材料名称</label>
+                        <input type="text" id="materialName" class="form-input" placeholder="装甲钢" value="装甲钢">
+                    </div>
+                    <div class="form-group">
+                        <label for="materialId" class="form-label">材料编号</label>
+                        <input type="text" id="materialId" class="form-input" placeholder="12" value="12">
+                    </div>
+                </div>
+
+                <!-- 参数配置区域 -->
+                <div class="material-params-area">
+                    <!-- 左侧：本构方程参数 -->
+                    <div class="param-section constitutive-params">
+                        <div class="param-section-header">
+                            <label for="constitutiveSelect" class="section-label">本构方程选择</label>
+                            <select id="constitutiveSelect" class="param-select">
+                                <option value="PLASTIC_KINEMATIC" selected>PLASTIC_KINEMATIC</option>
+                            </select>
+                        </div>
+
+                        <div class="param-grid">
+                            <div class="param-labels">
+                                <div class="param-label-header">参数名称</div>
+                                <div class="param-label">MID</div>
+                                <div class="param-label">RO</div>
+                                <div class="param-label">E</div>
+                                <div class="param-label">PR</div>
+                                <div class="param-label">SIGY</div>
+                                <div class="param-label">ETAN</div>
+                                <div class="param-label">BEAT</div>
+                                <div class="param-label">SRC</div>
+                                <div class="param-label">SRP</div>
+                                <div class="param-label">FS</div>
+                                <div class="param-label">VP</div>
+                            </div>
+                            
+                            <div class="param-units">
+                                <div class="param-unit-header">单位制 (cm/g/μs)</div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                            </div>
+                            
+                            <div class="param-values">
+                                <div class="param-value-header">值</div>
+                                <input type="text" class="param-input" value="1" placeholder="1">
+                                <input type="text" class="param-input" value="7.85" placeholder="7.85">
+                                <input type="text" class="param-input" value="2.1" placeholder="2.1">
+                                <input type="text" class="param-input" value="0.284" placeholder="0.284">
+                                <input type="text" class="param-input" value="0.018" placeholder="0.018">
+                                <input type="text" class="param-input" value="0.2" placeholder="0.2">
+                                <input type="text" class="param-input" value="1.0" placeholder="1.0">
+                                <input type="text" class="param-input" value="0.0" placeholder="0.0">
+                                <input type="text" class="param-input" value="0.0" placeholder="0.0">
+                                <input type="text" class="param-input" value="12.0" placeholder="12.0">
+                                <input type="text" class="param-input" value="0.0" placeholder="0.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 右侧：状态方程参数 -->
+                    <div class="param-section equation-params">
+                        <div class="param-section-header">
+                            <label for="equationSelect" class="section-label">状态方程选择</label>
+                            <select id="equationSelect" class="param-select">
+                                <option value="PLASTIC_KINEMATIC" selected>PLASTIC_KINEMATIC</option>
+                            </select>
+                        </div>
+
+                        <div class="param-grid">
+                            <div class="param-labels">
+                                <div class="param-label-header">参数名称</div>
+                                <div class="param-label">EOSID</div>
+                                <div class="param-label">C0</div>
+                                <div class="param-label">C1</div>
+                                <div class="param-label">C2</div>
+                                <div class="param-label">C3</div>
+                                <div class="param-label">C4</div>
+                                <div class="param-label">C5</div>
+                                <div class="param-label">C6</div>
+                                <div class="param-label">E0</div>
+                                <div class="param-label">V0</div>
+                            </div>
+                            
+                            <div class="param-units">
+                                <div class="param-unit-header">单位制 (cm/g/μs)</div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                                <div class="param-unit"></div>
+                            </div>
+                            
+                            <div class="param-values">
+                                <div class="param-value-header">值</div>
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                                <input type="text" class="param-input" value="" placeholder="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 弹出框底部按钮 -->
+            <div class="modal-footer">
+                <button class="modal-btn modal-btn-cancel" type="button">取消</button>
+                <button class="modal-btn modal-btn-save" type="button">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 材料选择弹出框功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const addBtn = document.querySelector('.add-material-btn');
+            const modal = document.getElementById('materialModal');
+            const modalCloseBtn = document.querySelector('.modal-close-btn');
+            const modalCancelBtn = document.querySelector('.modal-btn-cancel');
+            const modalSaveBtn = document.querySelector('.modal-btn-save');
+            const addMaterialModalBtn = document.querySelector('.add-material-modal-btn');
+
+            // 存储选中的材料
+            let selectedMaterials = [];
+
+            // 打开弹出框
+            function openModal() {
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // 防止背景滚动
+                
+                // 设置焦点到第一个可聚焦元素
+                setTimeout(() => {
+                    const firstFocusable = modal.querySelector('button, [tabindex]:not([tabindex="-1"])');
+                    if (firstFocusable) {
+                        firstFocusable.focus();
+                    }
+                }, 100);
+            }
+
+            // 关闭弹出框
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = ''; // 恢复背景滚动
+                addBtn.focus(); // 将焦点返回到触发按钮
+            }
+
+            // 事件监听器
+            addBtn.addEventListener('click', openModal);
+            modalCloseBtn.addEventListener('click', closeModal);
+            modalCancelBtn.addEventListener('click', closeModal);
+
+            // 点击遮罩层关闭弹出框
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+
+            // ESC键关闭弹出框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && modal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+
+            // 复选框功能
+            const checkboxes = document.querySelectorAll('.material-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('click', function() {
+                    const materialId = this.getAttribute('data-material-id');
+                    
+                    if (this.classList.contains('checked')) {
+                        // 取消选中
+                        this.classList.remove('checked');
+                        selectedMaterials = selectedMaterials.filter(id => id !== materialId);
+                    } else {
+                        // 选中
+                        this.classList.add('checked');
+                        selectedMaterials.push(materialId);
+                    }
+                    
+                    console.log('选中的材料:', selectedMaterials);
+                });
+            });
+
+            // 编辑按钮功能
+            const editBtns = document.querySelectorAll('.edit-btn');
+            editBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const materialId = this.getAttribute('data-material-id');
+                    console.log('编辑材料:', materialId);
+                    alert(`编辑材料 ${materialId} 功能待实现`);
+                });
+            });
+
+            // 删除按钮功能
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            deleteBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const materialId = this.getAttribute('data-material-id');
+                    const materialName = this.closest('tr').children[2].textContent;
+                    
+                    if (confirm(`确定要删除材料 "${materialName}" 吗？`)) {
+                        console.log('删除材料:', materialId);
+                        // 这里可以添加删除材料的逻辑
+                        this.closest('tr').remove();
+                        // 从选中列表中移除
+                        selectedMaterials = selectedMaterials.filter(id => id !== materialId);
+                    }
+                });
+            });
+
+            // 新增材料按钮功能
+            addMaterialModalBtn.addEventListener('click', function() {
+                console.log('新增材料');
+                closeModal(); // 关闭材料选择弹出框
+                openAddMaterialModal(); // 打开新增材料弹出框
+            });
+
+            // 保存按钮功能
+            modalSaveBtn.addEventListener('click', function() {
+                if (selectedMaterials.length === 0) {
+                    alert('请至少选择一个材料');
+                    return;
+                }
+                
+                console.log('确定选择的材料:', selectedMaterials);
+                
+                // 将选中的材料添加到项目材料库
+                addMaterialsToProject(selectedMaterials);
+                
+                closeModal();
+            });
+
+            // 键盘导航支持
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    document.body.classList.add('keyboard-navigation');
+                }
+            });
+
+            document.addEventListener('mousedown', function() {
+                document.body.classList.remove('keyboard-navigation');
+            });
+
+            // 焦点管理 - 困在弹出框内
+            modal.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab' && modal.classList.contains('active')) {
+                    const focusableElements = modal.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstFocusable = focusableElements[0];
+                    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey) {
+                        // Shift + Tab
+                        if (document.activeElement === firstFocusable) {
+                            e.preventDefault();
+                            lastFocusable.focus();
+                        }
+                    } else {
+                        // Tab
+                        if (document.activeElement === lastFocusable) {
+                            e.preventDefault();
+                            firstFocusable.focus();
+                        }
+                    }
+                }
+            });
+
+            // 初始化选中状态
+            checkboxes.forEach(checkbox => {
+                if (checkbox.classList.contains('checked')) {
+                    const materialId = checkbox.getAttribute('data-material-id');
+                    selectedMaterials.push(materialId);
+                }
+            });
+
+            console.log('初始选中的材料:', selectedMaterials);
+
+            // =============================================================================
+            // 材料项目管理功能
+            // =============================================================================
+            
+            // 存储项目中的材料数据
+            let projectMaterials = [];
+            let activeMaterial = null;
+            
+            // 材料数据模板
+            const materialDatabase = {
+                '1': {
+                    id: '1',
+                    name: '装甲钢',
+                    constitutive: 'PLASTIC_KINEMATIC',
+                    equation: 'PLASTIC_KINEMATIC',
+                    constitutiveParams: {
+                        'MID': '1',
+                        'RO': '7.85',
+                        'E': '2.1',
+                        'PR': '0.284',
+                        'SIGY': '0.018',
+                        'ETAN': '0.2',
+                        'BEAT': '1.0',
+                        'SRC': '0.0',
+                        'SRP': '0.0',
+                        'FS': '12.0',
+                        'VP': '0.0'
+                    },
+                    equationParams: {
+                        'EOSID': '',
+                        'C0': '',
+                        'C1': '',
+                        'C2': '',
+                        'C3': '',
+                        'C4': '',
+                        'C5': '',
+                        'C6': '',
+                        'E0': '',
+                        'V0': ''
+                    }
+                },
+                '2': {
+                    id: '2',
+                    name: '混凝土',
+                    constitutive: 'PLASTIC_KINEMATIC',
+                    equation: 'PLASTIC_KINEMATIC',
+                    constitutiveParams: {
+                        'MID': '2',
+                        'RO': '2.4',
+                        'E': '0.3',
+                        'PR': '0.2',
+                        'SIGY': '0.05',
+                        'ETAN': '0.01',
+                        'BEAT': '1.0',
+                        'SRC': '0.0',
+                        'SRP': '0.0',
+                        'FS': '2.0',
+                        'VP': '0.0'
+                    },
+                    equationParams: {
+                        'EOSID': '',
+                        'C0': '',
+                        'C1': '',
+                        'C2': '',
+                        'C3': '',
+                        'C4': '',
+                        'C5': '',
+                        'C6': '',
+                        'E0': '',
+                        'V0': ''
+                    }
+                },
+                '3': {
+                    id: '3',
+                    name: '45#钢',
+                    constitutive: 'PLASTIC_KINEMATIC',
+                    equation: 'PLASTIC_KINEMATIC',
+                    constitutiveParams: {
+                        'MID': '3',
+                        'RO': '7.8',
+                        'E': '2.0',
+                        'PR': '0.3',
+                        'SIGY': '0.45',
+                        'ETAN': '0.5',
+                        'BEAT': '1.0',
+                        'SRC': '0.0',
+                        'SRP': '0.0',
+                        'FS': '10.0',
+                        'VP': '0.0'
+                    },
+                    equationParams: {
+                        'EOSID': '',
+                        'C0': '',
+                        'C1': '',
+                        'C2': '',
+                        'C3': '',
+                        'C4': '',
+                        'C5': '',
+                        'C6': '',
+                        'E0': '',
+                        'V0': ''
+                    }
+                },
+                '4': {
+                    id: '4',
+                    name: 'RHA装甲钢',
+                    constitutive: 'PLASTIC_KINEMATIC',
+                    equation: 'PLASTIC_KINEMATIC',
+                    constitutiveParams: {
+                        'MID': '4',
+                        'RO': '7.85',
+                        'E': '2.1',
+                        'PR': '0.284',
+                        'SIGY': '1.2',
+                        'ETAN': '0.8',
+                        'BEAT': '1.0',
+                        'SRC': '0.0',
+                        'SRP': '0.0',
+                        'FS': '15.0',
+                        'VP': '0.0'
+                    },
+                    equationParams: {
+                        'EOSID': '',
+                        'C0': '',
+                        'C1': '',
+                        'C2': '',
+                        'C3': '',
+                        'C4': '',
+                        'C5': '',
+                        'C6': '',
+                        'E0': '',
+                        'V0': ''
+                    }
+                },
+                '5': {
+                    id: '5',
+                    name: '紫铜1',
+                    constitutive: 'PLASTIC_KINEMATIC',
+                    equation: 'PLASTIC_KINEMATIC',
+                    constitutiveParams: {
+                        'MID': '5',
+                        'RO': '8.9',
+                        'E': '1.1',
+                        'PR': '0.34',
+                        'SIGY': '0.3',
+                        'ETAN': '0.4',
+                        'BEAT': '1.0',
+                        'SRC': '0.0',
+                        'SRP': '0.0',
+                        'FS': '8.0',
+                        'VP': '0.0'
+                    },
+                    equationParams: {
+                        'EOSID': '',
+                        'C0': '',
+                        'C1': '',
+                        'C2': '',
+                        'C3': '',
+                        'C4': '',
+                        'C5': '',
+                        'C6': '',
+                        'E0': '',
+                        'V0': ''
+                    }
+                }
+            };
+            
+            // 添加材料到项目中
+            function addMaterialsToProject(materialIds) {
+                materialIds.forEach(id => {
+                    if (materialDatabase[id] && !projectMaterials.find(m => m.id === id)) {
+                        projectMaterials.push(materialDatabase[id]);
+                    }
+                });
+                
+                updateMaterialList();
+                
+                // 如果是第一次添加材料，自动选中第一个
+                if (projectMaterials.length > 0 && !activeMaterial) {
+                    selectMaterial(projectMaterials[0]);
+                }
+            }
+            
+            // 更新材料列表显示
+            function updateMaterialList() {
+                const emptyState = document.getElementById('emptyState');
+                const materialList = document.getElementById('materialList');
+                
+                if (projectMaterials.length === 0) {
+                    emptyState.style.display = 'flex';
+                    materialList.style.display = 'none';
+                } else {
+                    emptyState.style.display = 'none';
+                    materialList.style.display = 'block';
+                    
+                    // 生成材料列表HTML
+                    materialList.innerHTML = projectMaterials.map(material => `
+                        <div class="material-list-item" data-material-id="${material.id}" onclick="selectMaterial(materialDatabase['${material.id}'])">
+                            <div class="material-item-info">
+                                <div class="material-item-name">${material.name}</div>
+                            </div>
+                            <div class="material-item-actions">
+                                <button class="material-action-btn" title="删除材料" onclick="event.stopPropagation(); removeMaterial('${material.id}')">
+                                    <svg viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M5.5 5.5A.5.5 0 016 6v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm2.5 0a.5.5 0 01.5.5v6a.5.5 0 01-1 0V6a.5.5 0 01.5-.5zm3 .5a.5.5 0 00-1 0v6a.5.5 0 001 0V6z"/>
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 01-1 1H13v9a2 2 0 01-2 2H5a2 2 0 01-2-2V4h-.5a1 1 0 01-1-1V2a1 1 0 011-1H6a1 1 0 011-1h2a1 1 0 011 1h3.5a1 1 0 011 1v1zM4.118 4L4 4.059V13a1 1 0 001 1h6a1 1 0 001-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+            
+            // 选择材料并显示详情
+            function selectMaterial(material) {
+                activeMaterial = material;
+                
+                // 更新列表项的激活状态
+                document.querySelectorAll('.material-list-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                const activeItem = document.querySelector(`.material-list-item[data-material-id="${material.id}"]`);
+                if (activeItem) {
+                    activeItem.classList.add('active');
+                }
+                
+                // 显示材料详情
+                showMaterialDetails(material);
+            }
+            
+            // 显示材料详情
+            function showMaterialDetails(material) {
+                const emptyState = document.getElementById('detailsEmptyState');
+                const detailsContent = document.getElementById('materialDetailsContent');
+                
+                emptyState.style.display = 'none';
+                detailsContent.style.display = 'block';
+                
+                // 更新方程选择下拉框
+                document.getElementById('constitutiveEquation').value = material.constitutive;
+                document.getElementById('stateEquation').value = material.equation;
+                
+                // 更新本构方程参数
+                updateParamTable('constitutiveParams', material.constitutiveParams);
+                
+                // 更新状态方程参数
+                updateParamTable('stateParams', material.equationParams);
+            }
+            
+            // 更新参数表格
+            function updateParamTable(containerId, params) {
+                const container = document.getElementById(containerId);
+                
+                const paramLabels = containerId === 'constitutiveParams' 
+                    ? ['MID', 'RO', 'E', 'PR', 'SIGY', 'ETAN', 'BEAT', 'SRC', 'SRP', 'FS', 'VP']
+                    : ['EOSID', 'C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'E0', 'V0'];
+                
+                container.innerHTML = paramLabels.map(label => `
+                    <div class="param-row">
+                        <div class="param-cell param-name">${label}</div>
+                        <div class="param-cell param-unit">-</div>
+                        <div class="param-cell param-value">${params[label] || '-'}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // 编辑材料功能已移除
+            
+            // 删除材料
+            function removeMaterial(materialId) {
+                const material = projectMaterials.find(m => m.id === materialId);
+                if (material && confirm(`确定要从项目中移除材料 "${material.name}" 吗？`)) {
+                    projectMaterials = projectMaterials.filter(m => m.id !== materialId);
+                    
+                    // 如果删除的是当前激活的材料，清空详情显示
+                    if (activeMaterial && activeMaterial.id === materialId) {
+                        activeMaterial = null;
+                        document.getElementById('detailsEmptyState').style.display = 'flex';
+                        document.getElementById('materialDetailsContent').style.display = 'none';
+                        
+                        // 如果还有其他材料，选中第一个
+                        if (projectMaterials.length > 0) {
+                            selectMaterial(projectMaterials[0]);
+                        }
+                    }
+                    
+                    updateMaterialList();
+                }
+            }
+            
+            // 添加方程选择下拉框事件监听器
+            document.addEventListener('change', function(e) {
+                if (e.target.id === 'constitutiveEquation' && activeMaterial) {
+                    // 更新当前材料的本构方程
+                    activeMaterial.constitutive = e.target.value;
+                    console.log(`材料 ${activeMaterial.name} 的本构方程已更改为: ${e.target.value}`);
+                }
+                
+                if (e.target.id === 'stateEquation' && activeMaterial) {
+                    // 更新当前材料的状态方程
+                    activeMaterial.equation = e.target.value;
+                    console.log(`材料 ${activeMaterial.name} 的状态方程已更改为: ${e.target.value}`);
+                }
+            });
+
+            // 确保函数在全局作用域可用
+            window.selectMaterial = selectMaterial;
+            window.removeMaterial = removeMaterial;
+
+            // =============================================================================
+            // 新增材料弹出框功能
+            // =============================================================================
+            const addMaterialModal = document.getElementById('addMaterialModal');
+            const addMaterialCloseBtn = addMaterialModal.querySelector('.modal-close-btn');
+            const addMaterialCancelBtn = addMaterialModal.querySelector('.modal-btn-cancel');
+            const addMaterialSaveBtn = addMaterialModal.querySelector('.modal-btn-save');
+
+            // 打开新增材料弹出框
+            function openAddMaterialModal() {
+                addMaterialModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // 设置焦点到第一个输入框
+                setTimeout(() => {
+                    const firstInput = addMaterialModal.querySelector('#materialName');
+                    if (firstInput) {
+                        firstInput.focus();
+                        firstInput.select();
+                    }
+                }, 100);
+            }
+
+            // 关闭新增材料弹出框
+            function closeAddMaterialModal() {
+                addMaterialModal.classList.remove('active');
+                document.body.style.overflow = '';
+                addBtn.focus(); // 将焦点返回到触发按钮
+            }
+
+            // 事件监听器
+            addMaterialCloseBtn.addEventListener('click', closeAddMaterialModal);
+            addMaterialCancelBtn.addEventListener('click', closeAddMaterialModal);
+
+            // 点击遮罩层关闭弹出框
+            addMaterialModal.addEventListener('click', function(e) {
+                if (e.target === addMaterialModal) {
+                    closeAddMaterialModal();
+                }
+            });
+
+            // ESC键关闭弹出框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && addMaterialModal.classList.contains('active')) {
+                    closeAddMaterialModal();
+                }
+            });
+
+            // 保存新增材料
+            addMaterialSaveBtn.addEventListener('click', function() {
+                const materialName = document.getElementById('materialName').value.trim();
+                const materialId = document.getElementById('materialId').value.trim();
+
+                // 基本验证
+                if (!materialName) {
+                    alert('请输入材料名称');
+                    document.getElementById('materialName').focus();
+                    return;
+                }
+
+                if (!materialId) {
+                    alert('请输入材料编号');
+                    document.getElementById('materialId').focus();
+                    return;
+                }
+
+                // 收集所有参数值
+                const constitutiveParams = {};
+                const equationParams = {};
+                
+                const constitutiveInputs = document.querySelectorAll('.constitutive-params .param-input');
+                const constitutiveLabels = ['MID', 'RO', 'E', 'PR', 'SIGY', 'ETAN', 'BEAT', 'SRC', 'SRP', 'FS', 'VP'];
+                
+                constitutiveInputs.forEach((input, index) => {
+                    if (constitutiveLabels[index]) {
+                        constitutiveParams[constitutiveLabels[index]] = input.value;
+                    }
+                });
+
+                const equationInputs = document.querySelectorAll('.equation-params .param-input');
+                const equationLabels = ['EOSID', 'C0', 'C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'E0', 'V0'];
+                
+                equationInputs.forEach((input, index) => {
+                    if (equationLabels[index]) {
+                        equationParams[equationLabels[index]] = input.value;
+                    }
+                });
+
+                // 创建材料对象
+                const newMaterial = {
+                    id: materialId,
+                    name: materialName,
+                    constitutive: document.getElementById('constitutiveSelect').value,
+                    equation: document.getElementById('equationSelect').value,
+                    constitutiveParams: constitutiveParams,
+                    equationParams: equationParams,
+                    createdAt: new Date().toISOString()
+                };
+
+                console.log('新增材料:', newMaterial);
+
+                // 这里可以添加保存到后端的逻辑
+                alert(`材料 "${materialName}" 已成功添加！`);
+
+                // 重置表单
+                resetAddMaterialForm();
+                
+                closeAddMaterialModal();
+            });
+
+            // 重置新增材料表单
+            function resetAddMaterialForm() {
+                document.getElementById('materialName').value = '';
+                document.getElementById('materialId').value = '';
+                
+                // 重置所有参数输入框
+                const allInputs = addMaterialModal.querySelectorAll('.param-input');
+                allInputs.forEach(input => {
+                    input.value = '';
+                });
+                
+                // 重置下拉框
+                document.getElementById('constitutiveSelect').selectedIndex = 0;
+                document.getElementById('equationSelect').selectedIndex = 0;
+            }
+
+            // 焦点管理 - 困在弹出框内
+            addMaterialModal.addEventListener('keydown', function(e) {
+                if (e.key === 'Tab' && addMaterialModal.classList.contains('active')) {
+                    const focusableElements = addMaterialModal.querySelectorAll(
+                        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                    );
+                    const firstFocusable = focusableElements[0];
+                    const lastFocusable = focusableElements[focusableElements.length - 1];
+
+                    if (e.shiftKey) {
+                        // Shift + Tab
+                        if (document.activeElement === firstFocusable) {
+                            e.preventDefault();
+                            lastFocusable.focus();
+                        }
+                    } else {
+                        // Tab
+                        if (document.activeElement === lastFocusable) {
+                            e.preventDefault();
+                            firstFocusable.focus();
+                        }
+                    }
+                }
+            });
+
+            // 数值输入验证
+            const numericInputs = addMaterialModal.querySelectorAll('.param-input');
+            numericInputs.forEach(input => {
+                input.addEventListener('input', function(e) {
+                    // 允许数字、小数点、负号和科学计数法
+                    const value = e.target.value;
+                    const validPattern = /^-?\d*\.?\d*([eE][-+]?\d*)?$/;
+                    
+                    if (value !== '' && !validPattern.test(value)) {
+                        e.target.style.borderColor = '#ff4757';
+                    } else {
+                        e.target.style.borderColor = '';
+                    }
+                });
+            });
+
+            // =============================================================================
+            // 页面切换功能
+            // =============================================================================
+            
+            // 页面切换处理
+            function switchPage(pageId) {
+                // 隐藏所有页面
+                document.querySelectorAll('.page-content').forEach(page => {
+                    page.classList.remove('active');
+                });
+                
+                // 显示目标页面
+                const targetPage = document.getElementById(pageId + '-page');
+                if (targetPage) {
+                    targetPage.classList.add('active');
+                }
+                
+                // 更新导航状态
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.remove('active');
+                    tab.setAttribute('aria-selected', 'false');
+                });
+                
+                const activeTab = document.querySelector(`[data-page="${pageId}"]`);
+                if (activeTab) {
+                    activeTab.classList.add('active');
+                    activeTab.setAttribute('aria-selected', 'true');
+                }
+            }
+            
+            // 导航栏点击事件
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    
+                    if (pageId === 'material-model' || pageId === 'target-modeling') {
+                        switchPage(pageId);
+                    } else {
+                        // 其他页面暂时显示提示
+                        alert(`${this.textContent.trim()}功能正在开发中...`);
+                    }
+                });
+            });
+
+            // =============================================================================
+            // 目标建模页面交互功能
+            // =============================================================================
+            
+            // 模型类型切换
+            // 目标建模页面按钮切换
+            const targetModelingBtns = document.querySelectorAll('#target-modeling-page .small-btn[data-model-type]');
+            targetModelingBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // 更新按钮状态
+                    targetModelingBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const modelType = this.getAttribute('data-model-type');
+                    console.log('切换到模型类型:', modelType);
+                    
+                    // 这里可以根据模型类型更新界面内容
+                    if (modelType === 'equivalent') {
+                        // 等效靶模型的特定处理
+                        console.log('显示等效靶模型参数');
+                    } else if (modelType === 'vehicle') {
+                        // 整车模型的特定处理
+                        console.log('显示整车模型参数');
+                        alert('整车模型功能正在开发中，敬请期待！');
+                        // 重新激活等效靶模型按钮
+                        setTimeout(() => {
+                            targetModelingBtns.forEach(b => b.classList.remove('active'));
+                            document.querySelector('#target-modeling-page .small-btn[data-model-type="equivalent"]').classList.add('active');
+                        }, 100);
+                    }
+                });
+            });
+
+            // 模型库管理按钮
+            const modelLibraryBtn = document.querySelector('#target-modeling-page .small-btn.primary');
+            if (modelLibraryBtn) {
+                modelLibraryBtn.addEventListener('click', function() {
+                    console.log('点击模型库管理');
+                    alert('模型库管理功能正在开发中，敬请期待！');
+                });
+            }
+            
+            // 生成靶板模型按钮
+            const generateModelBtn = document.querySelector('.action-btn-primary');
+            if (generateModelBtn) {
+                generateModelBtn.addEventListener('click', function() {
+                    console.log('生成靶板模型');
+                    
+                    // 获取靶板参数
+                    const boardParams = {
+                        layers: parseInt(document.querySelector('.param-input-field[value="2"]').value),
+                        gridSize: parseInt(document.querySelector('.param-input-field[value="2"]:last-of-type').value),
+                        length: parseInt(document.querySelector('.param-input-field[value="50"]').value)
+                    };
+                    
+                    console.log('靶板参数:', boardParams);
+                    
+                    // 模拟生成过程
+                    this.disabled = true;
+                    this.textContent = '生成中...';
+                    
+                    setTimeout(() => {
+                        this.disabled = false;
+                        this.textContent = '生成靶板模型';
+                        alert('靶板模型生成完成！');
+                        
+                        // 更新三维视图
+                        const threejsContainer = document.querySelector('.threejs-view-container');
+                        if (threejsContainer) {
+                            threejsContainer.innerHTML = `
+                                <div style="text-align: center;">
+                                    <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                                    <div>靶板模型已生成</div>
+                                    <div style="margin-top: 8px; font-size: 14px; opacity: 0.7;">
+                                        层数: ${boardParams.layers} | 网格: ${boardParams.gridSize} | 长度: ${boardParams.length}cm
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }, 2000);
+                });
+            }
+            
+            // 保存至模型库按钮
+            const saveToLibraryBtn = document.querySelector('.action-btn-secondary');
+            if (saveToLibraryBtn) {
+                saveToLibraryBtn.addEventListener('click', function() {
+                    console.log('保存到模型库');
+                    alert('保存到模型库功能正在开发中...');
+                });
+            }
+            
+            // 靶板参数表格输入验证
+            const targetBoardInputs = document.querySelectorAll('.target-board-table input[type="number"]');
+            targetBoardInputs.forEach(input => {
+                input.addEventListener('input', function() {
+                    // 确保输入值为正数
+                    if (this.value < 0) {
+                        this.value = 0;
+                    }
+                });
+                
+                input.addEventListener('change', function() {
+                    console.log('靶板参数更新:', this.value);
+                });
+            });
+            
+            // 材料选择下拉框
+            const materialSelects = document.querySelectorAll('.target-board-table select');
+            materialSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    console.log('材料选择:', this.value);
+                    
+                    // 移除placeholder样式
+                    if (this.value) {
+                        this.classList.remove('material-select-placeholder');
+                    } else {
+                        this.classList.add('material-select-placeholder');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
